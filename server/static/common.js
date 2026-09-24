@@ -93,7 +93,7 @@ async function getGlobalActiveBoard() {
     const local = localStorage.getItem('aoi_active_board');
     if (local) {
       const parsed = JSON.parse(local);
-      if (parsed && (parsed.board_id || parsed.serial)) {
+      if (parsed && (parsed.board_id || parsed.serial) && parsed.verdict && parsed.verdict !== 'READY') {
         return parsed;
       }
     }

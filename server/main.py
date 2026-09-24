@@ -182,11 +182,11 @@ def clear_reference_cache():
     _REF_CACHE["components"] = None
 
 _ACTIVE_INSPECTION_STATE = {
-    "board_id": "TB005",
-    "serial": "TB005",
-    "verdict": "PASS",
+    "board_id": None,
+    "serial": None,
+    "verdict": "READY",
     "defective_components": 0,
-    "image_url": "/evaluation/test_boards/TB005.png",
+    "image_url": None,
     "overlay_image_b64": None,
     "depth_heatmap_b64": None,
     "components": [],
@@ -292,6 +292,29 @@ async def api_photometric_reconstruct(sample_id: str = "ps_sample_optimal"):
 
     return {
         "sample_id": sample_id,
+        "solder_evaluation": solder_eval,
+        "mean_slope_deg": round(float(np.mean(slope_map)), 2),
+        "peak_height_um": round(float(np.max(height_map)), 1),
+        "rgb_base64": visualizer.to_base64(img),
+        "normals_base64": visualizer.to_base64(normals_vis),
+        "slope_heatmap_base64": visualizer.to_base64(slope_colored)
+    }
+
+@app.post("/api/photometric/upload")
+async def api_photometric_upload(file: UploadFile = File(...)):
+    contents = await read_image_upload(file)
+    nparr = np.frombuffer(contents, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    if img is None:
+        raise HTTPException(status_code=400, detail="invalid_image_format")
+
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    normals_vis, albedo_map, slope_map, height_map = await run_in_threadpool(photometric_engine.reconstruct_surface_normals, rgb)
+    solder_eval = photometric_engine.classify_solder_joint(img)
+    slope_colored = cv2.applyColorMap(((slope_map / 90.0) * 255.0).astype(np.uint8), cv2.COLORMAP_INFERNO)
+
+    return {
+        "sample_id": "custom_upload",
         "solder_evaluation": solder_eval,
         "mean_slope_deg": round(float(np.mean(slope_map)), 2),
         "peak_height_um": round(float(np.max(height_map)), 1),

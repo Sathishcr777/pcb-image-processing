@@ -27,6 +27,7 @@ build/
 # Audit logs (generated at runtime — do not commit)
 server/audit/audit.jsonl
 server/audit/audit_errors.jsonl
+server/audit/audit_benchmark_history.jsonl
 
 # Archived inspection images (too large)
 server/archive/

@@ -135,8 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAuditLogs();
   fetchCFXTelemetry();
 
-  if (boardSelect && boardSelect.value) {
-    autoRunScenario(boardSelect.value);
+  // Load golden reference preview without auto-triggering inspections on startup
+  if (imgGoldenRef) {
+    imgGoldenRef.src = '/server/reference/golden_board.png';
   }
 
   // --- 3. Server Health Polling ---

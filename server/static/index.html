@@ -93,10 +93,10 @@
         </div>
         <div class="verdict-text-box">
           <div class="verdict-tag" id="verdictSubtitle">INSPECTION SUMMARY</div>
-          <h1 class="verdict-title" id="verdictTitle">BOARD READY</h1>
+          <h1 class="verdict-title" id="verdictTitle">AWAITING BOARD</h1>
           <div class="verdict-meta">
-            <span id="heroSerial">LOT: TB-001</span> &bull; 
-            <span id="heroTimestamp">TIME: 2026-08-27 UTC</span> &bull; 
+            <span id="heroSerial">LOT: NONE</span> &bull; 
+            <span id="heroTimestamp">STATUS: READY TO INSPECT</span> &bull; 
             <span id="heroOperator">STANDARDS: IPC-A-610H CLASS 2/3</span>
           </div>
         </div>
@@ -226,8 +226,9 @@
         <div class="input-selector-box">
           <label for="boardSelect"><i class="fa-solid fa-microchip"></i> Scenario:</label>
           <select id="boardSelect" class="ind-select">
+            <option value="" disabled selected>-- Select a Test Scenario or Upload Board --</option>
             <optgroup label="✅ Golden Standard (PASS - 100% Target)">
-              <option value="TB005" selected>TB005 - 100% Perfect Board (Zero Defects)</option>
+              <option value="TB005">TB005 - 100% Perfect Board (Zero Defects)</option>
               <option value="TB006">TB006 - Golden Production Board 2 (PASS)</option>
               <option value="TB007">TB007 - Golden Production Board 3 (PASS)</option>
               <option value="TB008">TB008 - Golden Production Board 4 (PASS)</option>

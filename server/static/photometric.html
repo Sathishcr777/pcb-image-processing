@@ -133,16 +133,21 @@
         </p>
       </div>
 
-      <!-- Solder Joint Scenario Selector -->
-      <div style="display: flex; align-items: center; gap: 10px;">
+      <!-- Solder Joint Scenario Selector & Upload -->
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
         <label style="font-size: 13px; color: #cbd5e1; font-weight: 600;">Solder Joint Sample:</label>
-        <select id="ps-scenario-select" class="ind-select" style="padding: 8px 14px; background: #0f172a; color: #fff; border: 1px solid #3b82f6; border-radius: 6px;" onchange="loadPhotometricSample(this.value)">
-          <option value="ps_sample_optimal" selected>Optimal Concave Meniscus (IPC Class 3 PASS)</option>
+        <select id="ps-scenario-select" class="ind-select" style="padding: 8px 14px; background: #0f172a; color: #fff; border: 1px solid #3b82f6; border-radius: 6px;" onchange="if(this.value) loadPhotometricSample(this.value)">
+          <option value="" disabled selected>-- Select a Demo Sample or Upload Image --</option>
+          <option value="ps_sample_optimal">Optimal Concave Meniscus (IPC Class 3 PASS)</option>
           <option value="ps_sample_insufficient">Insufficient Solder / Dry Joint (REWORK)</option>
           <option value="ps_sample_excess">Excess Solder Bridge / Bulge (DEFECT)</option>
           <option value="ps_sample_tombstone">Tombstone / Lifted Termination (DEFECT)</option>
           <option value="ps_sample_burn">TB032 Severe Substrate Thermal Burn Crater (CRITICAL DEFECT)</option>
         </select>
+        <label class="ind-btn" style="padding: 8px 14px; background: #2563eb; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Upload Solder Image
+          <input type="file" id="ps-upload-input" accept="image/*" style="display: none;">
+        </label>
       </div>
     </div>
 
@@ -151,19 +156,19 @@
       <!-- Panel 1: Multi-Angle RGB Illumination -->
       <div class="ps-viewport-box">
         <span class="ps-tag-label"><i class="fa-solid fa-palette"></i> 1. MULTI-ANGLE RGB COLOR HIGHLIGHT</span>
-        <img id="ps-img-rgb" src="/static/photometric_samples/ps_sample_optimal.png" alt="RGB Raw Illumination">
+        <img id="ps-img-rgb" src="/static/placeholder.png" alt="RGB Raw Illumination">
       </div>
 
       <!-- Panel 2: 3D Surface Normal Map (Nx, Ny, Nz) -->
       <div class="ps-viewport-box">
         <span class="ps-tag-label"><i class="fa-solid fa-compass"></i> 2. 3D SURFACE NORMAL VECTOR MAP (Nx, Ny, Nz)</span>
-        <img id="ps-img-normals" src="/static/photometric_samples/ps_sample_optimal.png" alt="Surface Normal Map">
+        <img id="ps-img-normals" src="/static/placeholder.png" alt="Surface Normal Map">
       </div>
 
       <!-- Panel 3: Solder Wetting Angle Heatmap -->
       <div class="ps-viewport-box">
         <span class="ps-tag-label"><i class="fa-solid fa-ruler-combined"></i> 3. IPC-A-610 WETTING ANGLE HEATMAP (θ = arccos Nz)</span>
-        <img id="ps-img-slopes" src="/static/photometric_samples/ps_sample_optimal.png" alt="Wetting Angle Map">
+        <img id="ps-img-slopes" src="/static/placeholder.png" alt="Wetting Angle Map">
       </div>
 
       <!-- Panel 4: Interactive 3D Poisson Elevation Mesh -->
@@ -177,19 +182,19 @@
     <div class="ps-telemetry-bar">
       <div class="ps-kpi-card">
         <div class="ps-kpi-lbl">MEAN WETTING ANGLE (θ)</div>
-        <div id="ps-kpi-angle" class="ps-kpi-val" style="color: #38bdf8;">28.4°</div>
+        <div id="ps-kpi-angle" class="ps-kpi-val" style="color: #38bdf8;">--</div>
       </div>
       <div class="ps-kpi-card">
         <div class="ps-kpi-lbl">PEAK SOLDER HEIGHT (Z)</div>
-        <div id="ps-kpi-height" class="ps-kpi-val" style="color: #34d399;">142.5 µm</div>
+        <div id="ps-kpi-height" class="ps-kpi-val" style="color: #34d399;">--</div>
       </div>
       <div class="ps-kpi-card">
         <div class="ps-kpi-lbl">IPC-A-610 CONFORMANCE</div>
-        <div id="ps-kpi-ipc" class="ps-kpi-val" style="color: #34d399; font-size: 16px;">IPC CLASS 3 TARGET</div>
+        <div id="ps-kpi-ipc" class="ps-kpi-val" style="color: #94a3b8; font-size: 16px;">AWAITING INPUT</div>
       </div>
       <div class="ps-kpi-card">
         <div class="ps-kpi-lbl">MENISCUS CURVATURE STATUS</div>
-        <div id="ps-kpi-status" class="ps-kpi-val" style="color: #34d399; font-size: 16px;">OPTIMAL WETTING</div>
+        <div id="ps-kpi-status" class="ps-kpi-val" style="color: #94a3b8; font-size: 16px;">STANDBY</div>
       </div>
     </div>
   </main>
@@ -312,9 +317,49 @@
       scene3d.add(mesh3d);
     }
 
+    async function uploadCustomPhotometric(file) {
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file, file.name);
+
+      const statusEl = document.getElementById("ps-kpi-status");
+      const ipcEl = document.getElementById("ps-kpi-ipc");
+      if (statusEl) { statusEl.textContent = "SOLVING 3D..."; statusEl.style.color = "#38bdf8"; }
+      if (ipcEl) { ipcEl.textContent = "COMPUTING"; ipcEl.style.color = "#38bdf8"; }
+
+      try {
+        const res = await fetch("/api/photometric/upload", { method: "POST", body: formData });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+          throw new Error(err.detail || "Server error");
+        }
+        const data = await res.json();
+
+        document.getElementById("ps-img-rgb").src = `data:image/png;base64,${data.rgb_base64}`;
+        document.getElementById("ps-img-normals").src = `data:image/png;base64,${data.normals_base64}`;
+        document.getElementById("ps-img-slopes").src = `data:image/png;base64,${data.slope_heatmap_base64}`;
+
+        const evalData = data.solder_evaluation;
+        document.getElementById("ps-kpi-angle").textContent = `${evalData.mean_wetting_angle_deg.toFixed(1)}°`;
+        document.getElementById("ps-kpi-height").textContent = `${evalData.peak_solder_height_um.toFixed(1)} µm`;
+        document.getElementById("ps-kpi-ipc").textContent = evalData.ipc_classification;
+        document.getElementById("ps-kpi-status").textContent = evalData.solder_status;
+
+        const isDefect = evalData.is_defect;
+        document.getElementById("ps-kpi-ipc").style.color = isDefect ? "#ef4444" : "#34d399";
+        document.getElementById("ps-kpi-status").style.color = isDefect ? "#ef4444" : "#34d399";
+
+        update3DPoissonMesh(evalData.solder_status);
+      } catch (err) {
+        console.error("Custom photometric upload failed:", err);
+        alert("Upload analysis failed: " + err.message);
+        if (statusEl) { statusEl.textContent = "ERROR"; statusEl.style.color = "#ef4444"; }
+      }
+    }
+
     function syncActivePhotometric(boardInfo) {
-      if (!boardInfo) return;
-      const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005');
+      if (!boardInfo || !boardInfo.board_id || boardInfo.verdict === "READY") return;
+      const bId = String(boardInfo.board_id || boardInfo.serial || '');
       const select = document.getElementById("ps-scenario-select");
       
       if (bId === "TB032" || bId.toLowerCase().includes("burn")) {
@@ -337,20 +382,30 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       init3DPoissonViewer();
-      if (typeof getGlobalActiveBoard === 'function') {
-        getGlobalActiveBoard().then(active => {
-          if (active && (active.board_id || active.serial)) {
-            syncActivePhotometric(active);
-          } else {
-            loadPhotometricSample("ps_sample_optimal");
+
+      const uploadInput = document.getElementById("ps-upload-input");
+      if (uploadInput) {
+        uploadInput.addEventListener("change", (e) => {
+          if (e.target.files.length) {
+            uploadCustomPhotometric(e.target.files[0]);
           }
         });
-      } else {
-        loadPhotometricSample("ps_sample_optimal");
+      }
+
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(active => {
+          if (active && active.board_id && active.verdict !== "READY") {
+            syncActivePhotometric(active);
+          }
+        });
       }
 
       if (typeof onGlobalActiveBoardChange === 'function') {
-        onGlobalActiveBoardChange(syncActivePhotometric);
+        onGlobalActiveBoardChange((active) => {
+          if (active && active.board_id && active.verdict !== "READY") {
+            syncActivePhotometric(active);
+          }
+        });
       }
     });
   </script>
