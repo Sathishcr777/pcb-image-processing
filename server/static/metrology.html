@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPC-A-610 Quantitative Metrology & CAD | PCB AI Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- Top Enterprise Industrial Header Bar -->
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 & Industry 4.0 Platform</div>
+        </div>
+      </div>
+
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-shield-check"></i> ISO 9001:2015</span>
+        <span class="pill pill-version"><i class="fa-solid fa-cube"></i> 3D Leveled Depth</span>
+      </div>
+    </div>
+
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Multi-Page Industrial Navigation Menu -->
+      <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn active"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="ind-dashboard">
+    <!-- Executive Educational Explainer Banner -->
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-ruler-combined text-primary"></i> IPC-A-610 Quantitative Metrology & SMT CAD Ingestion
+        </div>
+        <p class="page-explainer-desc">
+          Calculates sub-pixel physical placement offsets (ΔX, ΔY in mm), rotational skew (Δθ in degrees), side overhang percentages, and Pin-1 polarity dot verification. Categorizes every component against strict IPC-A-610 Class 3 (&le;25% overhang) and Class 2 (&le;50% overhang) manufacturing standards.
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-circle-check"></i> Class 3 &le; 25% Overhang</span>
+        <span class="explainer-chip"><i class="fa-solid fa-circle-dot"></i> Pin-1 Dot Polarity Check</span>
+        <span class="explainer-chip"><i class="fa-solid fa-file-import"></i> SMT Centroid (.csv)</span>
+      </div>
+    </div>
+
+    <section class="table-card">
+      <div class="table-card-header">
+        <div class="table-title-group">
+          <h2><i class="fa-solid fa-ruler-combined text-primary"></i> IPC-A-610 Quantitative Metrology Table</h2>
+          <span class="table-subtag">Sub-pixel physical offsets (ΔX, ΔY), Rotation (Δθ), Overhang % vs Class 2/3 limits & Pin-1 Polarity</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <select id="boardSelectMetro" class="ind-select">
+            <option value="TB005" selected>TB005 - 100% Perfect Board</option>
+            <option value="TB002">TB002 - C3 Tombstoned (3mm Shift)</option>
+            <option value="TB003">TB003 - R12 Tilted (18.5&deg; Skew)</option>
+            <option value="TB004">TB004 - C5 Shifted (45% Overhang)</option>
+            <option value="TB024">TB024 - U1 Micro-Rotation Defect</option>
+            <option value="TB001">TB001 - U1 Main MCU Missing</option>
+          </select>
+          <button id="btnRunMetro" class="ind-btn btn-primary"><i class="fa-solid fa-play"></i> Measure Board</button>
+          <button id="btnOpenCADModal" class="ind-btn btn-secondary" style="background: #3B82F6; color: white;"><i class="fa-solid fa-file-import"></i> Ingest CAD (.csv)</button>
+        </div>
+      </div>
+
+      <div class="table-responsive-wrapper">
+        <table class="ind-table" id="metrologyTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ΔX Offset (mm)</th>
+              <th>ΔY Offset (mm)</th>
+              <th>Rotation (Δθ)</th>
+              <th>Side Overhang %</th>
+              <th>IPC-A-610 Target Limit</th>
+              <th>Polarity Status</th>
+              <th>Metrology Verdict</th>
+            </tr>
+          </thead>
+          <tbody id="metrologyTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Standards Reference Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-top: 15px;">
+      <div style="background: #111827; border: 1px solid #10B981; padding: 18px; border-radius: 12px;">
+        <h4 style="color: #34D399; margin-bottom: 8px; font-size: 14px;"><i class="fa-solid fa-shield-halved"></i> IPC-A-610 Class 3 (Aerospace & High-Reliability)</h4>
+        <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin: 0;">
+          • Maximum Side Overhang: <strong>&le; 25% of component width</strong>.<br>
+          • Maximum Rotational Skew: <strong>&le; 3.0&deg;</strong>.<br>
+          • Mandatory Pin-1 dot index check on all MCU and IC packages.<br>
+          • Zero tolerance for unseated connector pins or lifted pads.
+        </p>
+      </div>
+      <div style="background: #111827; border: 1px solid #3B82F6; padding: 18px; border-radius: 12px;">
+        <h4 style="color: #60A5FA; margin-bottom: 8px; font-size: 14px;"><i class="fa-solid fa-industry"></i> IPC-A-610 Class 2 (Dedicated Service Commercial)</h4>
+        <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin: 0;">
+          • Maximum Side Overhang: <strong>&le; 50% of component width</strong>.<br>
+          • Maximum Rotational Skew: <strong>&le; 5.0&deg;</strong>.<br>
+          • Solder fillet minimum height: &ge; 25% of component lead height.<br>
+          • Overhangs &gt; 50% automatically routed to Rework Station.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- CAD Modal -->
+  <div id="cadModal" class="webcam-modal-backdrop" style="display: none;">
+    <div class="webcam-modal-content" style="max-width: 650px;">
+      <div class="webcam-modal-header">
+        <h3><i class="fa-solid fa-file-import text-primary"></i> SMT Pick-and-Place CAD Ingestion</h3>
+        <button id="btnCloseCADModal" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="padding: 20px; background: #0F172A;">
+        <p style="font-size: 13px; color: #CBD5E1; margin-top: 0;">
+          Upload SMT Pick-and-Place centroid files (<code>.csv</code> / <code>.xy</code> / <code>.pos</code>) to auto-generate component footprint ROIs.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+          <div>
+            <label style="font-size: 11px; color: #94A3B8;">PCB Width (mm):</label>
+            <input type="number" id="cadWidthMm" value="100.0" class="ind-select" style="width: 100%;">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: #94A3B8;">PCB Height (mm):</label>
+            <input type="number" id="cadHeightMm" value="80.0" class="ind-select" style="width: 100%;">
+          </div>
+        </div>
+        <div style="border: 2px dashed #334155; padding: 25px; text-align: center; border-radius: 8px; background: #1E293B;">
+          <i class="fa-solid fa-file-csv" style="font-size: 32px; color: #3B82F6; margin-bottom: 10px;"></i>
+          <div style="font-size: 13px; color: #FFFFFF; font-weight: 600;">Drag and Drop SMT Centroid File</div>
+          <input type="file" id="cadFileInput" accept=".csv, .xy, .pos, .txt" style="margin-top: 15px;">
+        </div>
+      </div>
+      <div class="webcam-modal-footer">
+        <button id="btnSubmitCAD" class="ind-btn btn-primary"><i class="fa-solid fa-upload"></i> Parse & Auto-Generate ROIs</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology & AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links"><span>IPC-A-610H Class 2/3</span> &bull; <span>IPC-CFX-2591</span> &bull; <span>ISO 9001:2015</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const boardSelect = document.getElementById('boardSelectMetro');
+      const btnRun = document.getElementById('btnRunMetro');
+      const tbody = document.getElementById('metrologyTableBody');
+
+      async function runMetrology(boardId) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 25px; color: #94A3B8;"><i class="fa-solid fa-spinner fa-spin"></i> Performing Sub-Pixel Metrology...</td></tr>`;
+        try {
+          const imgResp = await fetch(`/evaluation/test_boards/${boardId}.png`);
+          if (!imgResp.ok) throw new Error(`Image not found (HTTP ${imgResp.status})`);
+          const imgBlob = await imgResp.blob();
+          const fd = new FormData();
+          fd.append("file", imgBlob, `${boardId}.png`);
+          fd.append("board_serial", boardId);
+
+          const inspResp = await fetch('/inspect', { method: 'POST', body: fd });
+          if (!inspResp.ok) {
+            const err = await inspResp.json().catch(() => ({ detail: inspResp.statusText }));
+            throw new Error(err.detail || `HTTP ${inspResp.status}`);
+          }
+          const res = await inspResp.json();
+          const metrologyList = res.metrology || [];
+
+          tbody.innerHTML = metrologyList.map(m => {
+            let verdictBadge;
+            if (m.ipc_class_verdict === 'CLASS_3_TARGET') {
+              verdictBadge = `<span class="tag-badge tag-pass"><i class="fa-solid fa-circle-check"></i> CLASS 3 (TARGET)</span>`;
+            } else if (m.ipc_class_verdict === 'CLASS_2_ACCEPTABLE') {
+              verdictBadge = `<span class="tag-badge tag-rework"><i class="fa-solid fa-check"></i> CLASS 2 (ACCEPTABLE)</span>`;
+            } else {
+              verdictBadge = `<span class="tag-badge tag-fail"><i class="fa-solid fa-triangle-exclamation"></i> ${m.ipc_class_verdict || 'DEFECT'}</span>`;
+            }
+
+            let overhangBadge;
+            if (m.max_overhang_pct <= 25.0) {
+              overhangBadge = `<code style="color: #34D399; font-weight: 700; background: rgba(16, 185, 129, 0.18); border-color: #10B981;">${m.max_overhang_pct.toFixed(1)}%</code>`;
+            } else if (m.max_overhang_pct <= 50.0) {
+              overhangBadge = `<code style="color: #FBBF24; font-weight: 700; background: rgba(245, 158, 11, 0.2); border-color: #F59E0B;">${m.max_overhang_pct.toFixed(1)}%</code>`;
+            } else {
+              overhangBadge = `<code style="color: #F87171; font-weight: 700; background: rgba(239, 68, 68, 0.25); border-color: #EF4444;">${m.max_overhang_pct.toFixed(1)}%</code>`;
+            }
+
+            const rotColor = Math.abs(m.rotation_deg) > 3.0 ? '#FBBF24' : '#38BDF8';
+
+            let polarityBadge;
+            if (m.polarity_status === 'PIN1_VERIFIED') {
+              polarityBadge = `<span class="tag-badge" style="background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid #10B981;"><i class="fa-solid fa-circle-dot"></i> PIN 1 VERIFIED</span>`;
+            } else if (m.polarity_status === 'STRIPE_VERIFIED') {
+              polarityBadge = `<span class="tag-badge" style="background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid #10B981;"><i class="fa-solid fa-barcode"></i> STRIPE VERIFIED</span>`;
+            } else if (m.polarity_status === 'PIN1_REVERSED_OR_MISSING' || m.polarity_status === 'STRIPE_REVERSED') {
+              polarityBadge = `<span class="tag-badge tag-fail"><i class="fa-solid fa-triangle-exclamation"></i> REVERSED</span>`;
+            } else {
+              polarityBadge = `<span class="tag-badge" style="background: #1E293B; color: #CBD5E1; border: 1px solid #475569;">N/A (SYMMETRIC)</span>`;
+            }
+
+            return `
+              <tr>
+                <td><strong style="color: #FFFFFF; font-size: 14px;">${m.component_id}</strong></td>
+                <td><code>${m.delta_x_mm > 0 ? '+' : ''}${m.delta_x_mm.toFixed(3)} mm</code> <span style="color: #CBD5E1; font-size: 12px; margin-left: 4px;">(${m.delta_x_px > 0 ? '+' : ''}${m.delta_x_px} px)</span></td>
+                <td><code>${m.delta_y_mm > 0 ? '+' : ''}${m.delta_y_mm.toFixed(3)} mm</code> <span style="color: #CBD5E1; font-size: 12px; margin-left: 4px;">(${m.delta_y_px > 0 ? '+' : ''}${m.delta_y_px} px)</span></td>
+                <td><code style="color: ${rotColor};">${m.rotation_deg > 0 ? '+' : ''}${m.rotation_deg.toFixed(2)}&deg;</code></td>
+                <td>${overhangBadge}</td>
+                <td><code style="color: #E2E8F0; background: #0F172A; border-color: #334155;">Class 3 &le; 25% | Class 2 &le; 50%</code></td>
+                <td>${polarityBadge}</td>
+                <td>${verdictBadge}</td>
+              </tr>
+            `;
+          }).join('');
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="color: #EF4444; padding: 20px;">Error measuring metrology: ${e.message}</td></tr>`;
+        }
+      }
+
+      btnRun.addEventListener('click', () => runMetrology(boardSelect.value));
+      boardSelect.addEventListener('change', () => runMetrology(boardSelect.value));
+      runMetrology(boardSelect.value);
+
+      // CAD Modal
+      const cadModal = document.getElementById('cadModal');
+      document.getElementById('btnOpenCADModal').addEventListener('click', () => cadModal.style.display = 'flex');
+      document.getElementById('btnCloseCADModal').addEventListener('click', () => cadModal.style.display = 'none');
+      document.getElementById('btnSubmitCAD').addEventListener('click', async () => {
+        const fi = document.getElementById('cadFileInput');
+        if (!fi.files.length) return alert("Select a CAD file first.");
+        const fd = new FormData();
+        fd.append("file", fi.files[0]);
+        fd.append("pcb_width_mm", document.getElementById('cadWidthMm').value || 100.0);
+        fd.append("pcb_height_mm", document.getElementById('cadHeightMm').value || 80.0);
+        const r = await fetch('/cad/import', { method: 'POST', body: fd }).then(res => res.json());
+        alert(`✅ ${r.message}`);
+        cadModal.style.display = 'none';
+        runMetrology(boardSelect.value);
+      });
+
+      function syncActiveMetrology(boardInfo) {
+        if (!boardInfo) return;
+        const bId = boardInfo.board_id || boardInfo.serial || 'TB005';
+        if (boardSelect) {
+          let found = false;
+          for (let opt of boardSelect.options) {
+            if (opt.value === bId) {
+              boardSelect.value = bId;
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            let activeOpt = boardSelect.querySelector('option[data-active-custom="true"]');
+            if (!activeOpt) {
+              activeOpt = document.createElement('option');
+              activeOpt.setAttribute('data-active-custom', 'true');
+              boardSelect.insertBefore(activeOpt, boardSelect.firstChild);
+            }
+            activeOpt.value = bId;
+            activeOpt.textContent = `⚡ Live Active: ${bId}`;
+            boardSelect.value = bId;
+          }
+        }
+        runMetrology(bId);
+      }
+
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(active => {
+          if (active && (active.board_id || active.serial)) {
+            syncActiveMetrology(active);
+          } else {
+            runMetrology(boardSelect.value || 'TB005');
+          }
+        });
+      } else {
+        runMetrology(boardSelect.value || 'TB005');
+      }
+
+      if (typeof onGlobalActiveBoardChange === 'function') {
+        onGlobalActiveBoardChange(syncActiveMetrology);
+      }
+    });
+  </script>
+</body>
+</html>

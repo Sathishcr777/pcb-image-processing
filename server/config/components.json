@@ -1,0 +1,182 @@
+[
+  {
+    "id": "U1",
+    "name": "Top-Right QFP MCU (IC1)",
+    "type": "IC",
+    "bbox_xywh": [
+      720,
+      25,
+      155,
+      145
+    ],
+    "weight": 5.0,
+    "depth_check": true,
+    "tilt_check": true,
+    "tombstone_check": false
+  },
+  {
+    "id": "U2",
+    "name": "Mid-Upper QFP Controller (IC2)",
+    "type": "IC",
+    "bbox_xywh": [
+      585,
+      275,
+      145,
+      120
+    ],
+    "weight": 4.0,
+    "depth_check": true,
+    "tilt_check": true,
+    "tombstone_check": false
+  },
+  {
+    "id": "U3",
+    "name": "Mid-Lower QFP Controller (IC3)",
+    "type": "IC",
+    "bbox_xywh": [
+      585,
+      435,
+      145,
+      120
+    ],
+    "weight": 4.0,
+    "depth_check": true,
+    "tilt_check": true,
+    "tombstone_check": false
+  },
+  {
+    "id": "U4",
+    "name": "Bottom-Right QFP MCU (IC4)",
+    "type": "IC",
+    "bbox_xywh": [
+      720,
+      640,
+      155,
+      145
+    ],
+    "weight": 5.0,
+    "depth_check": true,
+    "tilt_check": true,
+    "tombstone_check": false
+  },
+  {
+    "id": "U5",
+    "name": "Center QFN Processor (IC5)",
+    "type": "IC",
+    "bbox_xywh": [
+      370,
+      405,
+      100,
+      110
+    ],
+    "weight": 4.5,
+    "depth_check": true,
+    "tilt_check": true,
+    "tombstone_check": false
+  },
+  {
+    "id": "J_TOP",
+    "name": "Top SMT Bus Header Array",
+    "type": "Header",
+    "bbox_xywh": [
+      285,
+      18,
+      270,
+      65
+    ],
+    "weight": 3.5,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": false
+  },
+  {
+    "id": "J_BOT1",
+    "name": "Bottom SMT Bus Header Left",
+    "type": "Header",
+    "bbox_xywh": [
+      120,
+      830,
+      390,
+      75
+    ],
+    "weight": 3.5,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": false
+  },
+  {
+    "id": "J_BOT2",
+    "name": "Bottom SMT Bus Header Right",
+    "type": "Header",
+    "bbox_xywh": [
+      550,
+      830,
+      190,
+      75
+    ],
+    "weight": 3.0,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": false
+  },
+  {
+    "id": "BANK_L1",
+    "name": "Left SMD Passives Matrix",
+    "type": "Passives",
+    "bbox_xywh": [
+      130,
+      170,
+      195,
+      320
+    ],
+    "weight": 3.0,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": false
+  },
+  {
+    "id": "BANK_L2",
+    "name": "Lower SMD Passives Bank",
+    "type": "Passives",
+    "bbox_xywh": [
+      250,
+      660,
+      240,
+      80
+    ],
+    "weight": 2.5,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": false
+  },
+  {
+    "id": "C_R1",
+    "name": "Right Edge Upper Cap Bank",
+    "type": "Capacitor",
+    "bbox_xywh": [
+      890,
+      155,
+      75,
+      270
+    ],
+    "weight": 2.0,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": true
+  },
+  {
+    "id": "C_R2",
+    "name": "Right Edge Lower Cap Bank",
+    "type": "Capacitor",
+    "bbox_xywh": [
+      890,
+      530,
+      75,
+      270
+    ],
+    "weight": 2.0,
+    "depth_check": true,
+    "tilt_check": false,
+    "tombstone_check": true
+  }
+]

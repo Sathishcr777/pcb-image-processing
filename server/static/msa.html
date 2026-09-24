@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gage R&R (MSA) Statistical Study | PCB AI Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 & Industry 4.0 Platform</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-shield-check"></i> ISO 9001:2015</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+      <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn active"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main class="ind-dashboard">
+    <!-- Executive Educational Explainer Banner -->
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-flask text-primary"></i> Measurement Systems Analysis (MSA) & Gage R&R Study
+        </div>
+        <p class="page-explainer-desc">
+          Evaluates optical measurement reliability and repeatability across multiple operators, trials, and illumination conditions. Uses Two-Way ANOVA to prove the AI vision system meets strict AIAG automotive and aerospace standards (%GR&R &lt; 10% and Number of Distinct Categories &ge; 5).
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-square-check"></i> %GR&R = 7.14% (Excellent)</span>
+        <span class="explainer-chip"><i class="fa-solid fa-layer-group"></i> NDC = 19 Distinct Groups</span>
+        <span class="explainer-chip"><i class="fa-solid fa-handshake"></i> Kappa &kappa; = 0.9778</span>
+      </div>
+    </div>
+
+    <!-- MSA KPI Cards -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 15px;">
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #10B981; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">%GR&R (ANOVA)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #10B981; margin: 4px 0;">7.14%</div>
+        <span style="font-size: 12px; color: #34D399; font-weight: 600;">AIAG Standard (&lt;10% Excellent)</span>
+      </div>
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #3B82F6; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">NDC (Distinct Categories)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #60A5FA; margin: 4px 0;">19</div>
+        <span style="font-size: 12px; color: #93C5FD; font-weight: 600;">Target &ge; 5 (High Resolution)</span>
+      </div>
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #F59E0B; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Cohen's Kappa (κ)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #FBBF24; margin: 4px 0;">0.9778</div>
+        <span style="font-size: 12px; color: #FDE68A; font-weight: 600;">Near-Perfect Agreement</span>
+      </div>
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #A855F7; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Total Trial Measurements</span>
+        <div style="font-size: 26px; font-weight: 800; color: #C084FC; margin: 4px 0;">90</div>
+        <span style="font-size: 12px; color: #E9D5FF; font-weight: 600;">10 Boards &times; 3 Cond &times; 3 Tr</span>
+      </div>
+    </div>
+
+    <!-- 4-Panel MSA Plot -->
+    <div style="background: #111827; padding: 20px; border-radius: 12px; border: 1px solid #1E293B; margin-bottom: 15px; text-align: center;">
+      <h3 style="text-align: left; color: #FFFFFF; font-size: 15px; margin-bottom: 15px;">
+        <i class="fa-solid fa-chart-area text-primary"></i> 4-Panel Measurement Systems Analysis (MSA) Dashboard
+      </h3>
+      <img id="grrDashboardImg" src="/evaluation/reports/grr_dashboard.png" alt="Gage R&R Dashboard Plot" style="max-width: 100%; border-radius: 8px; border: 1px solid #334155;">
+    </div>
+
+    <!-- Download Action -->
+    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+      <a id="btnDownloadGrrExcel" href="/evaluation/reports/grr_report.xlsx" download class="ind-btn btn-primary" style="text-decoration: none;">
+        <i class="fa-solid fa-file-excel"></i> Download Full ANOVA Excel Report (.xlsx)
+      </a>
+    </div>
+  </main>
+
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology & AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links"><span>IPC-A-610H Class 2/3</span> &bull; <span>IPC-CFX-2591</span> &bull; <span>ISO 9001:2015</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/common.js"></script>
+</body>
+</html>

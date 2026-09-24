@@ -1,0 +1,1 @@
+# Studio generator script

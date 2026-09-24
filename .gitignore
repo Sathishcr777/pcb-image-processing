@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Model weights (too large for git — download separately)
+*.pt
+*.pth
+*.onnx
+*.bin
+*.safetensors
+
+# Archive and zips
+*.zip
+*.tar.gz
+*.rar
+
+
+# Audit logs (generated at runtime — do not commit)
+server/audit/audit.jsonl
+server/audit/audit_errors.jsonl
+
+# Archived inspection images (too large)
+server/archive/
+
+# Roboflow dataset (download via script)
+training/datasets/
+
+# Demo video (too large)
+demo/backup_demo/*.mp4
+demo/backup_demo/*.mov
+
+# IDE / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log

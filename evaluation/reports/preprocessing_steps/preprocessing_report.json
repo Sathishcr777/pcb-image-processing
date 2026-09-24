@@ -1,0 +1,39 @@
+{
+  "input_dimensions": "1280x720",
+  "stage_1_optical_quality": {
+    "blur_variance": 924.47,
+    "status": "SHARP (PASS)",
+    "mean_brightness": 87.66,
+    "dynamic_range_contrast": 28.28
+  },
+  "stage_2_specular_suppression": {
+    "shiny_solder_glare_pixels_detected": 12677,
+    "glare_percentage_of_board": "1.376%",
+    "action": "Soft-clipped in CIE-LAB L-channel to 230 to prevent false-alarm triggers"
+  },
+  "stage_3_clahe_normalization": {
+    "algorithm": "Contrast-Limited Adaptive Histogram Equalization",
+    "tile_grid": "8x8 tiles",
+    "clip_limit": 2.5,
+    "purpose": "Eliminates uneven factory lighting gradients across the board surface"
+  },
+  "stage_4_bilateral_denoising": {
+    "diameter": 5,
+    "sigma_color": 35,
+    "sigma_space": 35,
+    "edge_preservation": "Maintains razor-sharp 0402 / IC pad boundaries while removing camera CMOS sensor noise"
+  },
+  "stage_5_alignment_homography": {
+    "inlier_matches": 2919,
+    "total_matches": 2931,
+    "alignment_quality_score": "100.0%",
+    "homography_matrix_det": 1.0
+  },
+  "stage_6_substrate_depth_leveling": {
+    "fitted_plane_equation": "Z = -0.00001X + 0.00000Y + 0.278",
+    "estimated_board_pitch_deg": 0.0,
+    "estimated_board_roll_deg": -0.0,
+    "substrate_sampling_points": 2901,
+    "result": "Substrate zeroed out to 0.0; isolated true physical component vertical lift"
+  }
+}

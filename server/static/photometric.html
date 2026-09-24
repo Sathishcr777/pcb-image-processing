@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photometric Stereo 3D Solder Inspection — PCB AI Station</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    .ps-grid-4panel {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 340px);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .ps-viewport-box {
+      background: #060913;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ps-viewport-box img, .ps-viewport-box canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .ps-tag-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      border: 1px solid #334155;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono, monospace);
+      color: #38bdf8;
+      z-index: 5;
+    }
+    .ps-telemetry-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .ps-kpi-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid #334155;
+      padding: 14px 18px;
+      border-radius: 8px;
+    }
+    .ps-kpi-lbl {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .ps-kpi-val {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: var(--font-mono, monospace);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Multi-Angle RGB Photometric Stereo 3D Solder Inspection</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H Wetting</span>
+        <span class="pill pill-version"><i class="fa-solid fa-layer-group"></i> Poisson 3D Surface</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">PHYSICS ENGINE</span>
+          <span class="telem-val text-pass">PHOTOMETRIC STEREO ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu -->
+    <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn active"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main style="padding: 20px 24px; max-width: 1440px; margin: 0 auto;">
+    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 16px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <h2 style="font-size: 17px; font-weight: 700; color: #f8fafc; margin-bottom: 4px;">
+          <i class="fa-solid fa-circle-nodes text-cyan"></i> Multi-Spectral Color Highlight & Solder Meniscus 3D Profiler
+        </h2>
+        <p style="font-size: 13px; color: #94a3b8; margin: 0;">
+          Recovers 3D surface normals ($[N_x, N_y, N_z]$) from Red ($75^\circ$), Green ($45^\circ$), and Blue ($20^\circ$) ring lighting. Reconstructs physical solder fillet wetting angle and 3D Poisson elevation mesh.
+        </p>
+      </div>
+
+      <!-- Solder Joint Scenario Selector -->
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-size: 13px; color: #cbd5e1; font-weight: 600;">Solder Joint Sample:</label>
+        <select id="ps-scenario-select" class="ind-select" style="padding: 8px 14px; background: #0f172a; color: #fff; border: 1px solid #3b82f6; border-radius: 6px;" onchange="loadPhotometricSample(this.value)">
+          <option value="ps_sample_optimal" selected>Optimal Concave Meniscus (IPC Class 3 PASS)</option>
+          <option value="ps_sample_insufficient">Insufficient Solder / Dry Joint (REWORK)</option>
+          <option value="ps_sample_excess">Excess Solder Bridge / Bulge (DEFECT)</option>
+          <option value="ps_sample_tombstone">Tombstone / Lifted Termination (DEFECT)</option>
+          <option value="ps_sample_burn">TB032 Severe Substrate Thermal Burn Crater (CRITICAL DEFECT)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 4-Panel Grid -->
+    <div class="ps-grid-4panel">
+      <!-- Panel 1: Multi-Angle RGB Illumination -->
+      <div class="ps-viewport-box">
+        <span class="ps-tag-label"><i class="fa-solid fa-palette"></i> 1. MULTI-ANGLE RGB COLOR HIGHLIGHT</span>
+        <img id="ps-img-rgb" src="/static/photometric_samples/ps_sample_optimal.png" alt="RGB Raw Illumination">
+      </div>
+
+      <!-- Panel 2: 3D Surface Normal Map (Nx, Ny, Nz) -->
+      <div class="ps-viewport-box">
+        <span class="ps-tag-label"><i class="fa-solid fa-compass"></i> 2. 3D SURFACE NORMAL VECTOR MAP (Nx, Ny, Nz)</span>
+        <img id="ps-img-normals" src="/static/photometric_samples/ps_sample_optimal.png" alt="Surface Normal Map">
+      </div>
+
+      <!-- Panel 3: Solder Wetting Angle Heatmap -->
+      <div class="ps-viewport-box">
+        <span class="ps-tag-label"><i class="fa-solid fa-ruler-combined"></i> 3. IPC-A-610 WETTING ANGLE HEATMAP (θ = arccos Nz)</span>
+        <img id="ps-img-slopes" src="/static/photometric_samples/ps_sample_optimal.png" alt="Wetting Angle Map">
+      </div>
+
+      <!-- Panel 4: Interactive 3D Poisson Elevation Mesh -->
+      <div class="ps-viewport-box" id="ps-3d-container">
+        <span class="ps-tag-label"><i class="fa-solid fa-cube"></i> 4. INTERACTIVE 3D POISSON ELEVATION MESH</span>
+        <canvas id="ps-webgl-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Telemetry KPIs -->
+    <div class="ps-telemetry-bar">
+      <div class="ps-kpi-card">
+        <div class="ps-kpi-lbl">MEAN WETTING ANGLE (θ)</div>
+        <div id="ps-kpi-angle" class="ps-kpi-val" style="color: #38bdf8;">28.4°</div>
+      </div>
+      <div class="ps-kpi-card">
+        <div class="ps-kpi-lbl">PEAK SOLDER HEIGHT (Z)</div>
+        <div id="ps-kpi-height" class="ps-kpi-val" style="color: #34d399;">142.5 µm</div>
+      </div>
+      <div class="ps-kpi-card">
+        <div class="ps-kpi-lbl">IPC-A-610 CONFORMANCE</div>
+        <div id="ps-kpi-ipc" class="ps-kpi-val" style="color: #34d399; font-size: 16px;">IPC CLASS 3 TARGET</div>
+      </div>
+      <div class="ps-kpi-card">
+        <div class="ps-kpi-lbl">MENISCUS CURVATURE STATUS</div>
+        <div id="ps-kpi-status" class="ps-kpi-val" style="color: #34d399; font-size: 16px;">OPTIMAL WETTING</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script>
+    let scene3d, camera3d, renderer3d, controls3d, mesh3d;
+
+    async function loadPhotometricSample(sampleId) {
+      try {
+        const res = await fetch(`/api/photometric/reconstruct?sample_id=${sampleId}`);
+        const data = await res.json();
+
+        document.getElementById("ps-img-rgb").src = `data:image/png;base64,${data.rgb_base64}`;
+        document.getElementById("ps-img-normals").src = `data:image/png;base64,${data.normals_base64}`;
+        document.getElementById("ps-img-slopes").src = `data:image/png;base64,${data.slope_heatmap_base64}`;
+
+        const evalData = data.solder_evaluation;
+        document.getElementById("ps-kpi-angle").textContent = `${evalData.mean_wetting_angle_deg.toFixed(1)}°`;
+        document.getElementById("ps-kpi-height").textContent = `${evalData.peak_solder_height_um.toFixed(1)} µm`;
+        document.getElementById("ps-kpi-ipc").textContent = evalData.ipc_classification;
+        document.getElementById("ps-kpi-status").textContent = evalData.solder_status;
+
+        const isDefect = evalData.is_defect;
+        document.getElementById("ps-kpi-ipc").style.color = isDefect ? "#ef4444" : "#34d399";
+        document.getElementById("ps-kpi-status").style.color = isDefect ? "#ef4444" : "#34d399";
+
+        update3DPoissonMesh(evalData.solder_status);
+      } catch (err) {
+        console.error("Photometric load failed:", err);
+      }
+    }
+
+    function init3DPoissonViewer() {
+      const container = document.getElementById("ps-3d-container");
+      const canvas = document.getElementById("ps-webgl-canvas");
+
+      scene3d = new THREE.Scene();
+      scene3d.background = new THREE.Color(0x060913);
+
+      camera3d = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera3d.position.set(0, 60, 80);
+
+      renderer3d = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer3d.setSize(container.clientWidth, container.clientHeight);
+
+      if (typeof THREE.OrbitControls !== "undefined") {
+        controls3d = new THREE.OrbitControls(camera3d, renderer3d.domElement);
+        controls3d.enableDamping = true;
+        controls3d.dampingFactor = 0.05;
+      }
+
+      // Lights
+      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+      scene3d.add(ambient);
+      const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+      dirLight.position.set(40, 80, 50);
+      scene3d.add(dirLight);
+
+      update3DPoissonMesh("OPTIMAL_CONCAVE_MENISCUS");
+
+      function animate() {
+        requestAnimationFrame(animate);
+        if (controls3d) controls3d.update();
+        if (mesh3d) mesh3d.rotation.y += 0.005;
+        renderer3d.render(scene3d, camera3d);
+      }
+      animate();
+    }
+
+    function update3DPoissonMesh(status) {
+      if (mesh3d) scene3d.remove(mesh3d);
+
+      // Reconstruct 3D Poisson surface parametric geometry
+      const width = 50, depth = 50, segments = 40;
+      const geo = new THREE.PlaneGeometry(width, depth, segments, segments);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const r = Math.sqrt(x*x + y*y);
+
+        let z = 0;
+        if (status.includes("OPTIMAL")) {
+          // Smooth concave meniscus curve
+          z = Math.max(0, 15 * (1.0 - Math.pow(r / 25.0, 1.5)));
+        } else if (status.includes("INSUFFICIENT")) {
+          // Almost flat pad
+          z = Math.max(0, 2 * (1.0 - r / 25.0));
+        } else if (status.includes("EXCESS")) {
+          // Bulbous dome / bulge
+          z = Math.max(0, 24 * Math.cos((r / 25.0) * (Math.PI / 2)));
+        } else if (status.includes("TOMBSTONE")) {
+          // Steep 45-degree ramp lift
+          z = Math.max(0, (x + 25.0) * 0.7);
+        } else if (status.includes("BURN") || status.includes("HOLE")) {
+          // Catastrophic burn puncture
+          if (r < 10.0) {
+            z = -14.0;
+          } else if (r < 22.0) {
+            z = -8.0 + Math.sin((r - 10.0) / 12.0 * Math.PI) * 4.0;
+          } else {
+            z = 0;
+          }
+        }
+        pos.setZ(i, z);
+      }
+
+      geo.computeVertexNormals();
+      const isDefect = status.includes("DEFECT") || status.includes("VIOLATION") || status.includes("INSUFFICIENT") || status.includes("BURN");
+      const mat = new THREE.MeshStandardMaterial({
+        color: status.includes("BURN") ? 0x1c1917 : (isDefect ? 0xef4444 : 0x38bdf8),
+        metalness: status.includes("BURN") ? 0.2 : 0.8,
+        roughness: status.includes("BURN") ? 0.9 : 0.2,
+        wireframe: false
+      });
+      mesh3d = new THREE.Mesh(geo, mat);
+      mesh3d.rotation.x = -Math.PI / 2.5;
+      scene3d.add(mesh3d);
+    }
+
+    function syncActivePhotometric(boardInfo) {
+      if (!boardInfo) return;
+      const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005');
+      const select = document.getElementById("ps-scenario-select");
+      
+      if (bId === "TB032" || bId.toLowerCase().includes("burn")) {
+        if (select) select.value = "ps_sample_burn";
+        loadPhotometricSample("ps_sample_burn");
+      } else if (bId === "TB002" || bId === "TB023" || bId === "TB024") {
+        if (select) select.value = "ps_sample_tombstone";
+        loadPhotometricSample("ps_sample_tombstone");
+      } else if (bId === "TB021" || bId === "TB022") {
+        if (select) select.value = "ps_sample_excess";
+        loadPhotometricSample("ps_sample_excess");
+      } else if (bId === "TB012" || bId === "TB025") {
+        if (select) select.value = "ps_sample_insufficient";
+        loadPhotometricSample("ps_sample_insufficient");
+      } else if (boardInfo.verdict === "PASS") {
+        if (select) select.value = "ps_sample_optimal";
+        loadPhotometricSample("ps_sample_optimal");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      init3DPoissonViewer();
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(active => {
+          if (active && (active.board_id || active.serial)) {
+            syncActivePhotometric(active);
+          } else {
+            loadPhotometricSample("ps_sample_optimal");
+          }
+        });
+      } else {
+        loadPhotometricSample("ps_sample_optimal");
+      }
+
+      if (typeof onGlobalActiveBoardChange === 'function') {
+        onGlobalActiveBoardChange(syncActivePhotometric);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Optical Inspection Station | PCB AI Suite</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Industrial Theme CSS -->
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- Top Enterprise Industrial Header Bar -->
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-microchip"></i>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 & Industry 4.0 Platform</div>
+        </div>
+      </div>
+
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-shield-check"></i> ISO 9001:2015</span>
+        <span class="pill pill-version"><i class="fa-solid fa-cube"></i> 3D Leveled Depth</span>
+      </div>
+    </div>
+
+    <!-- Server Connection Status Panel -->
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Multi-Page Industrial Navigation Menu -->
+      <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn active"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <!-- Main Industrial Dashboard Layout -->
+  <main class="ind-dashboard">
+
+    <!-- Executive Educational Explainer Banner -->
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-camera-retro text-primary"></i> Live Optical Inspection & Defect Workbench
+        </div>
+        <p class="page-explainer-desc">
+          Automated vision inspection console that compares incoming production PCB captures against the golden master board. Uses sub-pixel homography alignment, monocular 3D depth estimation, and tri-metric ensemble matching to verify component presence, solder fillet integrity, and IPC-A-610 quality standards.
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-certificate"></i> IPC-A-610 Class 2/3</span>
+        <span class="explainer-chip"><i class="fa-solid fa-cube"></i> 3D Leveled Depth</span>
+        <span class="explainer-chip"><i class="fa-solid fa-shield-halved"></i> Tri-Metric 2D Ensemble</span>
+      </div>
+    </div>
+    
+    <!-- Dominant Inspection Verdict & Radial Quality Score -->
+    <section class="summary-hero-card" id="heroSummaryCard">
+      <div class="hero-verdict-section">
+        <div class="verdict-icon-container" id="verdictIconBox">
+          <i class="fa-solid fa-circle-check" id="verdictIcon"></i>
+        </div>
+        <div class="verdict-text-box">
+          <div class="verdict-tag" id="verdictSubtitle">INSPECTION SUMMARY</div>
+          <h1 class="verdict-title" id="verdictTitle">BOARD READY</h1>
+          <div class="verdict-meta">
+            <span id="heroSerial">LOT: TB-001</span> &bull; 
+            <span id="heroTimestamp">TIME: 2026-08-27 UTC</span> &bull; 
+            <span id="heroOperator">STANDARDS: IPC-A-610H CLASS 2/3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-metrics-group">
+        <!-- Radial Gauge Widget -->
+        <div class="gauge-container">
+          <div class="gauge-title">HEALTH INDEX</div>
+          <div class="radial-gauge-wrapper">
+            <svg class="radial-svg" viewBox="0 0 120 120">
+              <path class="gauge-bg-track" d="M 15 90 A 50 50 0 1 1 105 90" fill="none" stroke-width="12"/>
+              <path class="gauge-fill-track" id="gaugeFill" d="M 15 90 A 50 50 0 1 1 105 90" fill="none" stroke-width="12" stroke-dasharray="235" stroke-dashoffset="0"/>
+            </svg>
+            <div class="gauge-score-display">
+              <span class="score-number" id="gaugeScore">--</span>
+              <span class="score-status" id="gaugeStatusText">WAITING</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="hero-stats-grid">
+          <div class="hero-stat-item">
+            <span class="hstat-label"><i class="fa-solid fa-stopwatch"></i> Latency</span>
+            <span class="hstat-val" id="heroLatency">-- ms</span>
+            <span class="hstat-sub">Target &lt; 500 ms</span>
+          </div>
+
+          <div class="hero-stat-item">
+            <span class="hstat-label"><i class="fa-solid fa-ruler-combined"></i> Max Overhang</span>
+            <span class="hstat-val" id="heroMaxOverhang">-- %</span>
+            <span class="hstat-sub">IPC Class 3 &le; 25%</span>
+          </div>
+
+          <div class="hero-stat-item">
+            <span class="hstat-label"><i class="fa-solid fa-compass-drafting"></i> Max Skew</span>
+            <span class="hstat-val" id="heroMaxRotation">-- &deg;</span>
+            <span class="hstat-sub">IPC Limit &le; 5.0&deg;</span>
+          </div>
+
+          <div class="hero-stat-item">
+            <span class="hstat-label"><i class="fa-solid fa-triangle-exclamation"></i> Exceptions</span>
+            <span class="hstat-val" id="heroDefectCount">-- Defect</span>
+            <span class="hstat-sub">Inspected</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 Enterprise KPI Widgets Grid -->
+    <section class="kpi-enterprise-grid" style="margin-top: 15px;">
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Units Inspected</span><i class="fa-solid fa-layer-group kw-icon icon-purple"></i></div>
+        <div class="kw-value" id="kpiBoards">1 Unit</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiBoardsTrend"><i class="fa-solid fa-check"></i> Current unit</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>First Pass Yield</span><i class="fa-solid fa-chart-line kw-icon icon-green"></i></div>
+        <div class="kw-value" id="kpiFPY">100.0%</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiFPYTrend"><i class="fa-solid fa-circle-check"></i> Healthy</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Defects per Million (DPMO)</span><i class="fa-solid fa-bug kw-icon icon-red"></i></div>
+        <div class="kw-value" id="kpiDPMO">0</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiDPMOTrend"><i class="fa-solid fa-shield-halved"></i> Six Sigma</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Average Latency</span><i class="fa-solid fa-bolt kw-icon icon-amber"></i></div>
+        <div class="kw-value" id="kpiAvgLatency">182 ms</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiAvgLatencyTrend"><i class="fa-solid fa-check"></i> Within target</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Component Footprints</span><i class="fa-solid fa-microchip kw-icon icon-purple"></i></div>
+        <div class="kw-value" id="kpiCompCount">12</div>
+        <div class="kw-footer"><span class="trend-neutral" id="kpiCompCountTrend">12 Active ROIs</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Tri-Metric Confidence</span><i class="fa-solid fa-shield-halved kw-icon icon-green"></i></div>
+        <div class="kw-value" id="kpiConfidence">99.4%</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiConfidenceTrend">SSIM+NCC+Edge</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Active Exceptions</span><i class="fa-solid fa-triangle-exclamation kw-icon icon-red"></i></div>
+        <div class="kw-value text-pass" id="kpiDefectsFound">0</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiDefectsFoundTrend">Zero defects</span></div>
+      </div>
+      <div class="kpi-widget">
+        <div class="kw-header"><span>Health Index</span><i class="fa-solid fa-heart-pulse kw-icon icon-green"></i></div>
+        <div class="kw-value" id="kpiHealthIndex">1.000</div>
+        <div class="kw-footer"><span class="trend-up" id="kpiHealthIndexTrend">Target &ge; 0.95</span></div>
+      </div>
+    </section>
+
+    <!-- 3-Panel Inspection Workspace -->
+    <section class="workspace-card" style="margin-top: 15px;">
+      <div class="workspace-header">
+        <div class="ws-title-group">
+          <h2><i class="fa-solid fa-laptop-code"></i> Triple-View Inspection Workspace</h2>
+          <span class="ws-subtitle">Golden Reference, Ingested Test Board, and Sub-pixel Metrology Overlay</span>
+        </div>
+        <div class="overlay-toolbar">
+          <button class="tool-btn active" id="toggleBBox" title="Toggle Bounding Boxes"><i class="fa-solid fa-draw-polygon"></i> Bounds</button>
+          <button class="tool-btn active" id="toggleLabels" title="Toggle Component Labels"><i class="fa-solid fa-tag"></i> Labels</button>
+          <button class="tool-btn active" id="toggleCoords" title="Toggle Coordinates"><i class="fa-solid fa-location-crosshairs"></i> Metrology</button>
+          <button class="tool-btn" id="toggleHeatmap" title="Toggle 3D Depth Heatmap Overlay"><i class="fa-solid fa-fire"></i> 3D Depth</button>
+          <a href="/3d-view" class="tool-btn" style="text-decoration: none; background: #4F46E5; color: white;" title="Open Interactive 3D Digital Twin"><i class="fa-solid fa-cube"></i> Open in 3D</a>
+        </div>
+      </div>
+
+      <div class="three-panel-workspace">
+        <div class="panel-box">
+          <div class="box-tag"><i class="fa-solid fa-star text-amber"></i> Golden Reference Board</div>
+          <div class="box-canvas-wrapper" id="wrapRef"><img id="imgGoldenRef" src="/static/placeholder.png" alt="Golden Reference"></div>
+        </div>
+        <div class="panel-box">
+          <div class="box-tag"><i class="fa-solid fa-camera"></i> Current Board Capture</div>
+          <div class="box-canvas-wrapper" id="wrapTest"><img id="imgTestInput" src="/static/placeholder.png" alt="Current Input"></div>
+        </div>
+        <div class="panel-box panel-highlight">
+          <div class="box-tag tag-primary"><i class="fa-solid fa-bullseye"></i> Metrology & Defect Overlay</div>
+          <div class="box-canvas-wrapper" id="wrapOverlay"><img id="imgOverlayResult" src="/static/placeholder.png" alt="Inspection Overlay"></div>
+        </div>
+      </div>
+
+      <div class="workspace-action-bar">
+        <div class="input-selector-box">
+          <label for="boardSelect"><i class="fa-solid fa-microchip"></i> Scenario:</label>
+          <select id="boardSelect" class="ind-select">
+            <optgroup label="✅ Golden Standard (PASS - 100% Target)">
+              <option value="TB005" selected>TB005 - 100% Perfect Board (Zero Defects)</option>
+              <option value="TB006">TB006 - Golden Production Board 2 (PASS)</option>
+              <option value="TB007">TB007 - Golden Production Board 3 (PASS)</option>
+              <option value="TB008">TB008 - Golden Production Board 4 (PASS)</option>
+              <option value="TB009">TB009 - Golden Production Board 5 (PASS)</option>
+              <option value="TB001">TB001 - Production Batch Golden Sample (PASS)</option>
+            </optgroup>
+            <optgroup label="⚠️ Component Missing Defects (FAIL / REWORK)">
+              <option value="TB010">TB010 - [DEFECT] Top-Right MCU (U1) Missing</option>
+              <option value="TB011">TB011 - [DEFECT] Center QFN Processor (U5) Missing</option>
+              <option value="TB013">TB013 - [DEFECT] Mid-Upper Controller (U2) Missing</option>
+              <option value="TB015">TB015 - [DEFECT] Top SMT Bus Header (J_TOP) Missing</option>
+              <option value="TB016">TB016 - [DEFECT] Bottom SMT Header (J_BOT1) Missing</option>
+              <option value="TB017">TB017 - [DEFECT] Left SMT Passives Matrix (BANK_L1) Missing</option>
+              <option value="TB018">TB018 - [DEFECT] Bottom-Right MCU (U4) Missing</option>
+            </optgroup>
+            <optgroup label="⚠️ Metrology, Tilt & Multi-Defect Stress (FAIL / REWORK)">
+              <option value="TB003">TB003 - [DEFECT] Mid-Upper Controller (U2) Angular Tilt (18°)</option>
+              <option value="TB014">TB014 - [DEFECT] Multi-Part Missing (U3 + C_R2 Capacitor Bank)</option>
+              <option value="TB020">TB020 - [CRITICAL FAIL] Dual Core Missing (U1 MCU + U5 Processor)</option>
+              <option value="TB022">TB022 - [CRITICAL FAIL] Triple Controller Missing (U2 + U3 + U4)</option>
+              <option value="TB031">TB031 - [CRITICAL FAIL] Multi-MCU Missing (U1 + U4 Missing)</option>
+              <option value="TB032">TB032 - [CRITICAL DEFECT] Severe Substrate Burn & Thermal Hole Rupture</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="action-btn-group">
+          <button id="btnOpenCADModal" class="ind-btn btn-secondary" style="background: #3B82F6; color: white;"><i class="fa-solid fa-file-import"></i> Ingest CAD (.csv)</button>
+          <button id="btnOpenWebcam" class="ind-btn btn-secondary"><i class="fa-solid fa-camera"></i> Live Capture</button>
+          <label for="fileUploadInput" class="ind-btn btn-secondary" style="cursor: pointer;"><i class="fa-solid fa-folder-open"></i> Upload Board</label>
+          <input type="file" id="fileUploadInput" accept="image/png, image/jpeg" hidden>
+
+          <label for="refUploadInput" class="ind-btn btn-outline" style="cursor: pointer;"><i class="fa-solid fa-star"></i> Upload Ref</label>
+          <input type="file" id="refUploadInput" accept="image/png, image/jpeg" hidden>
+
+          <button id="btnSetGolden" class="ind-btn btn-outline"><i class="fa-solid fa-check-double"></i> Set Golden</button>
+          <button id="btnRunInspection" class="ind-btn btn-primary"><i class="fa-solid fa-play"></i> Run Inspection</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flagged Process Exceptions -->
+    <section class="defect-cards-section" id="defectCardsSection" style="display: none; margin-top: 15px;">
+      <div class="section-title-group">
+        <h2><i class="fa-solid fa-triangle-exclamation text-fail"></i> Flagged Process Exceptions</h2>
+        <span id="defectCardsCountTag">0 active</span>
+      </div>
+      <div class="defect-cards-grid" id="defectCardsContainer"></div>
+    </section>
+
+    <!-- Component Table & Timeline -->
+    <section class="split-table-timeline-grid" style="margin-top: 15px;">
+      <div class="table-card">
+        <div class="table-card-header">
+          <div class="table-title-group">
+            <h2><i class="fa-solid fa-list-check"></i> Component Quality Table</h2>
+            <span class="table-subtag" id="tableComponentSubtitle">12 components inspected</span>
+          </div>
+          <div class="table-toolbar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="tableSearchInput" placeholder="Search ID or package">
+            </div>
+            <select id="tableFilterSelect" class="table-filter-select">
+              <option value="ALL">All Statuses</option>
+              <option value="PASS">Pass</option>
+              <option value="REWORK">Review</option>
+              <option value="FAIL">Fail</option>
+              <option value="DEFECT">Defects</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+          <table class="ind-table" id="componentTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Component Reference</th>
+                <th>Package Type</th>
+                <th>Coordinates (X,Y,W,H)</th>
+                <th>Weight</th>
+                <th>2D Tri-Metric %</th>
+                <th>3D Height/Tilt %</th>
+                <th>IPC Status</th>
+                <th>Verdict</th>
+              </tr>
+            </thead>
+            <tbody id="componentTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-header">
+          <h3><i class="fa-solid fa-clock-rotate-left"></i> Inspection Timeline</h3>
+          <span class="timeline-tag">Event Stream</span>
+        </div>
+        <div class="timeline-stream" id="timelineStream"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SMT CAD Centroid Ingestion Modal -->
+  <div id="cadModal" class="webcam-modal-backdrop" style="display: none;">
+    <div class="webcam-modal-content" style="max-width: 650px;">
+      <div class="webcam-modal-header">
+        <h3><i class="fa-solid fa-file-import text-primary"></i> SMT Pick-and-Place CAD Ingestion</h3>
+        <button id="btnCloseCADModal" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="padding: 20px; background: #0F172A;">
+        <p style="font-size: 13px; color: #94A3B8; margin-top: 0;">
+          Upload standard SMT Pick-and-Place centroid files (<code>.csv</code> / <code>.xy</code> / <code>.pos</code>) from Altium, KiCad, or Eagle to auto-generate component footprint ROIs.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+          <div>
+            <label style="font-size: 11px; color: #64748B;">PCB Width (mm):</label>
+            <input type="number" id="cadWidthMm" value="100.0" class="ind-select" style="width: 100%;">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: #64748B;">PCB Height (mm):</label>
+            <input type="number" id="cadHeightMm" value="80.0" class="ind-select" style="width: 100%;">
+          </div>
+        </div>
+        <div style="border: 2px dashed #334155; padding: 25px; text-align: center; border-radius: 8px; background: #1E293B;">
+          <i class="fa-solid fa-file-csv" style="font-size: 32px; color: #3B82F6; margin-bottom: 10px;"></i>
+          <div style="font-size: 13px; color: #E2E8F0; font-weight: 600;">Drag and Drop SMT Centroid File</div>
+          <input type="file" id="cadFileInput" accept=".csv, .xy, .pos, .txt" style="margin-top: 15px;">
+        </div>
+      </div>
+      <div class="webcam-modal-footer">
+        <button id="btnSubmitCAD" class="ind-btn btn-primary"><i class="fa-solid fa-upload"></i> Parse & Auto-Generate ROIs</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Webcam Modal Stream -->
+  <div id="webcamModal" class="webcam-modal-backdrop" style="display: none;">
+    <div class="webcam-modal-content">
+      <div class="webcam-modal-header">
+        <h3><i class="fa-solid fa-camera"></i> Live Optical Capture</h3>
+        <button id="btnCloseWebcam" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="webcam-video-box">
+        <video id="modalWebcamVideo" autoplay playsinline></video>
+        <canvas id="modalWebcamCanvas" hidden></canvas>
+      </div>
+      <div class="webcam-modal-footer">
+        <button id="btnCaptureModalWebcam" class="ind-btn btn-primary"><i class="fa-solid fa-circle-dot"></i> Capture and Inspect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology & AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links">
+        <span>IPC-A-610H Class 2/3</span> &bull; 
+        <span>IPC-CFX-2591</span> &bull; 
+        <span>ISO 9001:2015</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/common.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

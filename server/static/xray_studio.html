@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>3D X-Ray & Metrology Tomography Studio | PCB AI Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    :root {
+      --bg-dark: #050811;
+      --card-bg: rgba(11, 19, 43, 0.85);
+      --card-border: #1e293b;
+      --cyan-glow: #0284c7;
+      --cyan-bright: #38bdf8;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .viewport-3d-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 195px);
+      min-height: 620px;
+      background: radial-gradient(circle at 45% 45%, #0d1933 0%, #040813 100%);
+      border-radius: 12px;
+      border: 1px solid #1E293B;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    #webglCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Top HUD Mode Selector Bar */
+    .hud-top-bar {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 20;
+      flex-wrap: wrap;
+    }
+
+    .top-mode-btn {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      color: #94a3b8;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .top-mode-btn:hover {
+      background: rgba(30, 41, 59, 0.95);
+      color: #ffffff;
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    .top-mode-btn.active {
+      background: #0284c7;
+      color: #ffffff !important;
+      border-color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+
+    /* Defect Banner & Pills Bar */
+    .defect-alert-banner {
+      position: absolute;
+      top: 66px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 20;
+      flex-wrap: wrap;
+    }
+
+    .defect-badge-pill {
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+
+    .defect-badge-fail {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      border: 1px solid #ef4444;
+    }
+
+    .defect-badge-fail:hover {
+      background: rgba(239, 68, 68, 0.45);
+      color: #ffffff;
+      transform: scale(1.03);
+    }
+
+    .defect-badge-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid #059669;
+    }
+
+    /* Compact Right-Side Definition Panel */
+    .layers-sidebar {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 224px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .layer-filter-card {
+      background: rgba(10, 18, 38, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .layer-filter-card:hover {
+      transform: translateX(-3px);
+      background: rgba(15, 28, 60, 0.95);
+      border-color: #334155;
+    }
+
+    .layer-filter-card.active {
+      background: rgba(13, 27, 62, 0.98);
+    }
+
+    /* Layer Card Color Variants */
+    .card-all.active { border-color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.35); }
+    .card-traces.active { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.35); }
+    .card-chips.active { border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.35); }
+    .card-passives.active { border-color: #eab308; box-shadow: 0 0 12px rgba(234, 179, 8, 0.35); }
+    .card-vias.active { border-color: #f97316; box-shadow: 0 0 12px rgba(249, 115, 22, 0.35); }
+    .card-solder.active { border-color: #cbd5e1; box-shadow: 0 0 12px rgba(203, 213, 225, 0.35); }
+    .card-substrate.active { border-color: #06b6d4; box-shadow: 0 0 12px rgba(6, 182, 212, 0.35); }
+
+    .card-icon-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+    }
+
+    .layer-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      overflow: hidden;
+    }
+
+    .layer-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      line-height: 1.2;
+    }
+
+    .layer-desc {
+      font-size: 9px;
+      color: #94a3b8;
+      line-height: 1.2;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* Floating Defect Details Inspector Modal */
+    .defect-inspector-card {
+      position: absolute;
+      top: 115px;
+      left: 16px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid #ef4444;
+      border-radius: 10px;
+      padding: 14px 16px;
+      z-index: 25;
+      box-shadow: 0 8px 32px rgba(239, 68, 68, 0.25);
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bottom-Left Material Legend */
+    .material-legend-pill {
+      position: absolute;
+      bottom: 65px;
+      left: 16px;
+      background: rgba(11, 19, 43, 0.90);
+      backdrop-filter: blur(14px);
+      border: 1px solid #334155;
+      padding: 7px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 20;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.5);
+    }
+
+    .legend-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .legend-color-box {
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    /* Bottom HUD Navigation & Controls */
+    .hud-controls-bottom {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      right: 320px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(11, 19, 43, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      z-index: 20;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mode-pill-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      background: rgba(30, 41, 59, 0.85);
+      color: #94a3b8;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill-btn:hover {
+      background: #1e293b;
+      color: #f8fafc;
+      border-color: #38bdf8;
+    }
+
+    .mode-pill-btn.active {
+      background: #0284c7;
+      color: #ffffff !important;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .hud-slider {
+      appearance: none;
+      height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      outline: none;
+      accent-color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Enterprise Industrial Header Bar -->
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-radiation text-cyan"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">3D X-Ray & Metrology Tomography Studio</div>
+          <div class="brand-sub">IPC-A-610 Class 3 Sub-Surface Automated X-Ray Inspection (AXI)</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-atom"></i> IPC-7095D BGA Voids</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-layer-group"></i> Multi-Layer Substrate</span>
+        <span class="pill pill-version"><i class="fa-solid fa-image"></i> Ultra-Clear 3D X-Ray Studio</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active" style="background: #38bdf8; box-shadow: 0 0 10px #38bdf8;"></div>
+        <div class="telem-info">
+          <span class="telem-label">AXI DETECTOR</span>
+          <span class="telem-val" style="color: #38bdf8;" id="telemDetector">160kV / 0.8µm FOCAL SPOT</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Multi-Page Industrial Navigation Menu -->
+  <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn active"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main style="padding: 12px 20px; max-width: 1760px; margin: 0 auto;">
+
+    <!-- 3D X-Ray Viewport Container -->
+    <div class="viewport-3d-container">
+      <canvas id="webglCanvas"></canvas>
+
+      <!-- Top Bar: Radiographic Mode Selectors -->
+      <div class="hud-top-bar">
+        <button id="btnModeXRay" class="top-mode-btn active" onclick="switchMainVisualMode('multispectral')">
+          <i class="fa-solid fa-radiation"></i> X-Ray View
+        </button>
+        <button id="btnModeInferno" class="top-mode-btn" onclick="switchMainVisualMode('inferno')">
+          <i class="fa-solid fa-droplet"></i> Inferno Density
+        </button>
+        <button id="btnModeGray" class="top-mode-btn" onclick="switchMainVisualMode('gray')">
+          <i class="fa-solid fa-circle-half-stroke"></i> Monochrome
+        </button>
+        <button id="btnModeBlue" class="top-mode-btn" onclick="switchMainVisualMode('jet')">
+          <i class="fa-solid fa-water"></i> Total Blue Spectrum
+        </button>
+
+        <select id="boardScenarioSelect" class="ind-select" style="padding: 6px 12px; font-size: 11px; background: rgba(15,23,42,0.9); color: #38bdf8; border: 1px solid #0284c7; border-radius: 6px; font-weight: 700; margin-left: 8px;" onchange="handleBoardSelection(this.value)">
+          <option value="ACTIVE_LIVE">⚡ Active Inspected Board</option>
+          <optgroup label="Golden Standard Boards">
+            <option value="ai_hd_xray" selected>💎 Ultra-HD Master Radiograph (Highlight X-Ray)</option>
+            <option value="TB005">TB005 - 100% Perfect Golden Board (PASS)</option>
+            <option value="TB006">TB006 - Golden Reference Sample 2 (PASS)</option>
+          </optgroup>
+          <optgroup label="Defect Detection Boards (IPC-A-610 Failures)">
+            <option value="TB010">TB010 - BGA Solder Void & SMT Defect (FAIL)</option>
+            <option value="TB020">TB020 - Solder Web Bridging & Tombstone (FAIL)</option>
+            <option value="TB014">TB014 - Multi-Part Missing Component (FAIL)</option>
+            <option value="TB002">TB002 - C3 Tombstoned 45° Lift (FAIL)</option>
+            <option value="TB003">TB003 - R12 Tilted & U2 Shifted (FAIL)</option>
+            <option value="TB004">TB004 - C5 Shifted Solder Overhang (FAIL)</option>
+            <option value="TB022">TB022 - Misaligned QFP & Overhang (FAIL)</option>
+            <option value="TB031">TB031 - Complex Multi-Defect Matrix (FAIL)</option>
+            <option value="TB032">TB032 - Severe Substrate Burn & Thermal Hole Rupture (FAIL)</option>
+          </optgroup>
+        </select>
+
+        <label class="top-mode-btn" style="padding: 6px 12px; cursor: pointer; background: #2563eb; color: #ffffff; border-color: #3b82f6;">
+          <i class="fa-solid fa-folder-open"></i> Upload PCB
+          <input type="file" id="imageUploadInput" accept="image/*" style="display: none;" onchange="handleDirectImageUpload(event)">
+        </label>
+      </div>
+
+      <!-- Real-Time Defect Alert Banner with Interactive Jump Pills -->
+      <div id="defectAlertBanner" class="defect-alert-banner">
+        <!-- Dynamically rendered defect pills -->
+      </div>
+
+      <!-- Floating Defect Details Inspector Modal -->
+      <div id="defectInspectorModal" class="defect-inspector-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <span id="inspDefectBadge" class="badge" style="background: rgba(239,68,68,0.25); color: #ef4444; border: 1px solid #dc2626; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 800;">CRITICAL DEFECT</span>
+            <div id="inspDefectTitle" style="font-size: 13px; font-weight: 800; color: #ffffff; margin-top: 4px; font-family: var(--font-outfit);">BGA Solder Voiding</div>
+          </div>
+          <button onclick="closeDefectInspector()" style="background: none; border: none; color: #94a3b8; font-size: 14px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div style="font-size: 11px; display: flex; flex-direction: column; gap: 5px; color: #cbd5e1;">
+          <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Component:</span> <span id="inspComponent" style="font-weight: 700; color: #38bdf8;">U5 FPGA BGA Core</span></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Violation:</span> <span id="inspViolation" style="font-weight: 700; color: #ef4444;">Void Ratio: 31.4% (>25% Max)</span></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Standard:</span> <span id="inspStandard" style="font-weight: 700; color: #f59e0b;">IPC-7095D / IPC-A-610 Cl. 3</span></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Subsurface Z:</span> <span id="inspDepth" style="font-weight: 700; color: #c084fc;">Z = 350 µm</span></div>
+        </div>
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #334155; font-size: 10px; color: #94a3b8; line-height: 1.3;" id="inspAction">
+          <strong style="color: #f87171;">Recommended Action:</strong> Reflow re-balling or board rework required before functional test.
+        </div>
+      </div>
+
+      <!-- Compact Right-Side Definition Panel -->
+      <div class="layers-sidebar">
+        
+        <!-- 1. X-Ray -->
+        <div id="cardAll" class="layer-filter-card card-all active" onclick="selectMaterialFilter('all')">
+          <div class="card-icon-box" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">
+            <i class="fa-solid fa-radiation"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #38bdf8;">X-Ray</div>
+            <div class="layer-desc">All components & structures</div>
+          </div>
+        </div>
+
+        <!-- 2. Copper Traces -->
+        <div id="cardTraces" class="layer-filter-card card-traces" onclick="selectMaterialFilter('traces')">
+          <div class="card-icon-box" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border-color: rgba(34, 197, 94, 0.3);">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #22c55e;">Copper Traces</div>
+            <div class="layer-desc">Copper layers & conductors</div>
+          </div>
+        </div>
+
+        <!-- 3. IC Chips -->
+        <div id="cardChips" class="layer-filter-card card-chips" onclick="selectMaterialFilter('chips')">
+          <div class="card-icon-box" style="background: rgba(168, 85, 247, 0.15); color: #a855f7; border-color: rgba(168, 85, 247, 0.3);">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #a855f7;">IC Chips</div>
+            <div class="layer-desc">Integrated circuits & die</div>
+          </div>
+        </div>
+
+        <!-- 4. Capacitors & Resistors -->
+        <div id="cardPassives" class="layer-filter-card card-passives" onclick="selectMaterialFilter('passives')">
+          <div class="card-icon-box" style="background: rgba(234, 179, 8, 0.15); color: #eab308; border-color: rgba(234, 179, 8, 0.3);">
+            <i class="fa-solid fa-cubes-stacked"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #eab308;">Capacitors & Resistors</div>
+            <div class="layer-desc">Passive components</div>
+          </div>
+        </div>
+
+        <!-- 5. Vias & Holes -->
+        <div id="cardVias" class="layer-filter-card card-vias" onclick="selectMaterialFilter('vias')">
+          <div class="card-icon-box" style="background: rgba(249, 115, 22, 0.15); color: #f97316; border-color: rgba(249, 115, 22, 0.3);">
+            <i class="fa-solid fa-circle-dot"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #f97316;">Vias & Holes</div>
+            <div class="layer-desc">Drilled vias & through-holes</div>
+          </div>
+        </div>
+
+        <!-- 6. Solder Joints -->
+        <div id="cardSolder" class="layer-filter-card card-solder" onclick="selectMaterialFilter('solder')">
+          <div class="card-icon-box" style="background: rgba(203, 213, 225, 0.15); color: #cbd5e1; border-color: rgba(203, 213, 225, 0.3);">
+            <i class="fa-solid fa-circle-nodes"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #cbd5e1;">Solder Joints</div>
+            <div class="layer-desc">Solder connections & quality</div>
+          </div>
+        </div>
+
+        <!-- 7. Board Substrate -->
+        <div id="cardSubstrate" class="layer-filter-card card-substrate" onclick="selectMaterialFilter('substrate')">
+          <div class="card-icon-box" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4; border-color: rgba(6, 182, 212, 0.3);">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div class="layer-info">
+            <div class="layer-title" style="color: #06b6d4;">Board Substrate</div>
+            <div class="layer-desc">FR-4 / dielectric density</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom-Left Material Legend Bar -->
+      <div class="material-legend-pill">
+        <div class="legend-tag"><span class="legend-color-box" style="background: #f97316; color: #f97316;"></span> Copper</div>
+        <div class="legend-tag"><span class="legend-color-box" style="background: #a855f7; color: #a855f7;"></span> IC / Silicon</div>
+        <div class="legend-tag"><span class="legend-color-box" style="background: #e2e8f0; color: #e2e8f0;"></span> Solder</div>
+        <div class="legend-tag"><span class="legend-color-box" style="background: #22c55e; color: #22c55e;"></span> Ceramic</div>
+        <div class="legend-tag"><span class="legend-color-box" style="background: #06b6d4; color: #06b6d4;"></span> Substrate</div>
+      </div>
+
+      <!-- Bottom HUD: Camera Angles & Slicing Sliders -->
+      <div class="hud-controls-bottom">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="mode-pill-btn" onclick="setCameraView('isometric')"><i class="fa-solid fa-cube"></i> Isometric 3D</button>
+          <button class="mode-pill-btn" onclick="setCameraView('top')"><i class="fa-solid fa-crosshairs"></i> Top 2D</button>
+          <button class="mode-pill-btn" onclick="setCameraView('side')"><i class="fa-solid fa-arrows-up-down"></i> Side</button>
+          <button id="btnAutoRotate" class="mode-pill-btn active" onclick="toggleAutoRotate()"><i class="fa-solid fa-rotate"></i> Auto-Rotate</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="font-size: 11px; color: #cbd5e1; font-weight: 600;"><i class="fa-solid fa-bars"></i> Exploded:</label>
+            <input type="range" id="explodedSlider" min="0" max="30" value="0" step="1" class="hud-slider" style="width: 60px;" oninput="updateExplodedStack(this.value)">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="font-size: 11px; color: #cbd5e1; font-weight: 600;"><i class="fa-solid fa-scissors"></i> Z-Clip:</label>
+            <input type="range" id="zClipSlider" min="0" max="1600" value="1600" step="50" class="hud-slider" style="width: 60px;" oninput="updateZClip(this.value)">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+  
+  <script src="/static/common.js"></script>
+  <script>
+    let scene, camera, renderer, controls, raycaster, mouse;
+    let pcbSubstrateMesh = null, topRadiographMesh = null, innerCopperMesh = null, bottomLayerMesh = null;
+    let cornerRings = [];
+    let anomalyMarkersGroup = new THREE.Group();
+    let pulsingBeacons = [];
+
+    let isAutoRotating = true;
+    let currentMainMode = "multispectral"; // 'multispectral', 'bone', 'inferno', 'gray', 'jet'
+    let currentMaterialFilter = "all"; // 'all', 'traces', 'chips', 'passives', 'vias', 'solder', 'substrate'
+    let activeBoardId = "ai_hd_xray";
+    let activeCustomImageSrc = null;
+    let customModeDataUrls = null;
+    let textureLoader = new THREE.TextureLoader();
+
+    const boardW = 100, boardL = 100, boardT = 3.0;
+
+    // Comprehensive Defect Knowledgebase by Board Scenario
+    const DEFECT_DATABASE = {
+      "TB010": [
+        {
+          id: "U5 BGA Voiding",
+          title: "BGA Solder Ball Voiding (31.4%)",
+          component: "U5 FPGA BGA Core (Ball C4)",
+          violation: "31.4% Void Area (>25.0% Max Limit)",
+          standard: "IPC-7095D Class 3 / IPC-A-610",
+          depth: "Z = 320 µm",
+          action: "Component de-soldering and reflow re-balling required.",
+          x: -12.5,
+          z: -8.0,
+          color: 0xef4444,
+          icon: "fa-triangle-exclamation"
+        },
+        {
+          id: "R4 Missing SMT",
+          title: "Missing SMT Resistor",
+          component: "R4 0402 Pull-up Resistor",
+          violation: "Unpopulated component pads with un-wetted solder",
+          standard: "IPC-A-610 Class 3 Section 8.3",
+          depth: "Z = Top Layer",
+          action: "SMT pick-and-place placement & hand soldering rework.",
+          x: 24.0,
+          z: -28.0,
+          color: 0xf59e0b,
+          icon: "fa-ban"
+        }
+      ],
+      "TB020": [
+        {
+          id: "U2 Solder Bridge",
+          title: "Solder Web Bridging Short",
+          component: "U2 Controller QFP Pins #14 & #15",
+          violation: "Subsurface electrical solder short bridge",
+          standard: "IPC-A-610 Class 3 Zero Tolerance",
+          depth: "Z = 180 µm",
+          action: "Precision micro-wicking and solder de-bridging required.",
+          x: 22.0,
+          z: -16.0,
+          color: 0xef4444,
+          icon: "fa-bolt"
+        },
+        {
+          id: "C8 Tombstone",
+          title: "Angular Tombstone Lift (35°)",
+          component: "C8 0603 Filter Capacitor",
+          violation: "Non-wetted terminal lifted at 35° angle",
+          standard: "IPC-A-610 Class 3 Section 8.2",
+          depth: "Z = Top SMT",
+          action: "Hot-air reflow alignment & pad resoldering.",
+          x: -32.0,
+          z: 18.0,
+          color: 0xf59e0b,
+          icon: "fa-arrows-up-down"
+        }
+      ],
+      "TB014": [
+        {
+          id: "J1 PTH Barrel Void",
+          title: "PTH Through-Hole Fill Void (62%)",
+          component: "J1 Main Connector Pin #3 Barrel",
+          violation: "62.0% Vertical Barrel Fill (<75% IPC Min)",
+          standard: "IPC-A-610 Class 3 Section 7.3.5",
+          depth: "Z = Subsurface Barrel (0-1600 µm)",
+          action: "Selective wave solder touch-up / flux pin injection.",
+          x: -43.0,
+          z: 42.0,
+          color: 0xef4444,
+          icon: "fa-circle-notch"
+        },
+        {
+          id: "C12 Missing Part",
+          title: "Missing Decoupling Capacitor",
+          component: "C12 0805 Bypass Capacitor",
+          violation: "Completely missing component body on footprint",
+          standard: "IPC-A-610 Class 3 Section 8.3",
+          depth: "Z = Top Layer",
+          action: "Re-populate SMD capacitor via rework station.",
+          x: 15.0,
+          z: 32.0,
+          color: 0xf59e0b,
+          icon: "fa-ban"
+        }
+      ],
+      "TB002": [
+        {
+          id: "C3 Tombstone",
+          title: "Severe Tombstone Lift (45° Tilt)",
+          component: "C3 0805 Decoupling Capacitor",
+          violation: "Complete single-pad lift off substrate (45°)",
+          standard: "IPC-A-610 Class 3 Section 8.2",
+          depth: "Z = Top SMT Joint",
+          action: "Re-level component and re-flow solder joint.",
+          x: -25.0,
+          z: -16.0,
+          color: 0xef4444,
+          icon: "fa-arrows-up-down"
+        }
+      ],
+      "TB003": [
+        {
+          id: "R12 Rotation Skew",
+          title: "Rotational Skew & Pad Overhang (22.5°)",
+          component: "R12 0402 SMD Resistor",
+          violation: "22.5° angular offset violating pad footprint limits",
+          standard: "IPC-A-610 Class 3 Section 8.1",
+          depth: "Z = Top SMT",
+          action: "Precision tweezing and re-alignment reflow.",
+          x: 18.0,
+          z: -32.0,
+          color: 0xf59e0b,
+          icon: "fa-rotate"
+        }
+      ],
+      "TB004": [
+        {
+          id: "C5 Solder Overhang",
+          title: "Solder Joint Overhang (55 µm)",
+          component: "C5 0805 Capacitor Pad Edge",
+          violation: "Side overhang exceeds 25% component width",
+          standard: "IPC-A-610 Class 3 Section 8.2.1",
+          depth: "Z = Top Joint",
+          action: "Solder re-dressing and excess fillet removal.",
+          x: -18.0,
+          z: 22.0,
+          color: 0xf59e0b,
+          icon: "fa-ruler-horizontal"
+        }
+      ],
+      "TB022": [
+        {
+          id: "U3 QFP Misaligned",
+          title: "QFP Lead Misalignment (18.4°)",
+          component: "U3 Microcontroller QFP-48",
+          violation: "Lead offset exceeds 25% minimum pad width",
+          standard: "IPC-A-610 Class 3 Section 8.3.5",
+          depth: "Z = Top Substrate",
+          action: "Desolder QFP, clean pads, re-align on pick-and-place.",
+          x: 26.0,
+          z: 14.0,
+          color: 0xef4444,
+          icon: "fa-arrows-split-up-and-left"
+        }
+      ],
+      "TB031": [
+        {
+          id: "U5 Critical Void",
+          title: "BGA Solder Void Cluster (32.8%)",
+          component: "U5 Multi-Ball Array (B4, C4, D4)",
+          violation: "Cluster void exceeds IPC Class 3 25% Threshold",
+          standard: "IPC-7095D Class 3",
+          depth: "Z = 340 µm",
+          action: "Scrap or complete BGA re-ball cycle.",
+          x: -13.0,
+          z: -8.5,
+          color: 0xef4444,
+          icon: "fa-triangle-exclamation"
+        },
+        {
+          id: "U2 Pin Bridge",
+          title: "Lead Frame Solder Short",
+          component: "U2 Controller Pins #14-#15",
+          violation: "Conductive bridge across adjacent leads",
+          standard: "IPC-A-610 Class 3",
+          depth: "Z = 180 µm",
+          action: "Micro-wicking de-bridging.",
+          x: 22.0,
+          z: -16.0,
+          color: 0xef4444,
+          icon: "fa-bolt"
+        },
+        {
+          id: "J1 Via Void",
+          title: "Incomplete Barrel Fill (58%)",
+          component: "J1 Connector Pin #3",
+          violation: "58.4% Vertical Fill (<75% Limit)",
+          standard: "IPC-A-610 Class 3",
+          depth: "Z = 800 µm",
+          action: "Through-hole re-soldering.",
+          x: -43.0,
+          z: 42.0,
+          color: 0xf59e0b,
+          icon: "fa-circle-notch"
+        }
+      ],
+      "TB032": [
+        {
+          id: "Substrate Burn Rupture",
+          title: "Catastrophic FR-4 Thermal Substrate Burn Hole",
+          component: "CFAN / CON2 Power Stage Substrate",
+          violation: "Complete dielectric burn-through and trace vaporization",
+          standard: "IPC-A-610 Class 3 Section 10.2 (Substrate Damage / Scrap)",
+          depth: "Z = Substrate Rupture (0-1600 µm)",
+          action: "Scrap assembly. Investigate power stage overcurrent event.",
+          x: 0.0,
+          z: -4.0,
+          color: 0xef4444,
+          icon: "fa-fire"
+        }
+      ]
+    };
+
+    function init() {
+      const canvas = document.getElementById("webglCanvas");
+      const container = canvas.parentElement;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x040813);
+
+      camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(-6, 75, 88);
+
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.localClippingEnabled = true;
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.target.set(-6, 0, 0);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.autoRotate = isAutoRotating;
+      controls.autoRotateSpeed = 0.8;
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      // Ambient & Directional Lighting
+      const ambLight = new THREE.AmbientLight(0xffffff, 1.1);
+      scene.add(ambLight);
+
+      const dirLight = new THREE.DirectionalLight(0x38bdf8, 0.8);
+      dirLight.position.set(40, 90, 50);
+      scene.add(dirLight);
+
+      const rimLight = new THREE.DirectionalLight(0x06b6d4, 0.6);
+      rimLight.position.set(-50, -30, -50);
+      scene.add(rimLight);
+
+      // High-Tech Cyber Blueprint Grid
+      const grid = new THREE.GridHelper(240, 48, 0x1e3a8a, 0x091e42);
+      grid.position.y = -12;
+      scene.add(grid);
+
+      scene.add(anomalyMarkersGroup);
+
+      loadInitialBoard();
+
+      window.addEventListener("resize", onWindowResize);
+      renderer.domElement.addEventListener("pointerdown", onPointerClick);
+      animate();
+    }
+
+    function loadInitialBoard() {
+      buildBoardScene();
+    }
+
+    function getActiveRadiographUrl() {
+      if (currentMaterialFilter !== "all") {
+        return `/static/boards/mat_${currentMaterialFilter}.png`;
+      }
+      
+      if (currentMainMode === "multispectral") {
+        return `/static/boards/mat_all.png`;
+      }
+
+      if (customModeDataUrls && customModeDataUrls[currentMainMode]) {
+        return customModeDataUrls[currentMainMode];
+      }
+
+      return `/static/boards/${activeBoardId}_xray_${currentMainMode}.png`;
+    }
+
+    function buildBoardScene() {
+      if (pcbSubstrateMesh) scene.remove(pcbSubstrateMesh);
+      if (topRadiographMesh) scene.remove(topRadiographMesh);
+      if (innerCopperMesh) scene.remove(innerCopperMesh);
+      if (bottomLayerMesh) scene.remove(bottomLayerMesh);
+      cornerRings.forEach(r => scene.remove(r));
+      cornerRings = [];
+
+      while (anomalyMarkersGroup.children.length > 0) anomalyMarkersGroup.remove(anomalyMarkersGroup.children[0]);
+      pulsingBeacons = [];
+
+      const radiographUrl = getActiveRadiographUrl();
+      const radiographTex = textureLoader.load(
+        radiographUrl,
+        undefined,
+        undefined,
+        (err) => {
+          console.warn("Radiograph load fallback:", err);
+          if (topRadiographMesh && topRadiographMesh.material) {
+            topRadiographMesh.material.map = textureLoader.load(`/static/boards/TB005_xray_${currentMainMode}.png`);
+            topRadiographMesh.material.needsUpdate = true;
+          }
+        }
+      );
+      radiographTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      radiographTex.generateMipmaps = true;
+      radiographTex.minFilter = THREE.LinearMipmapLinearFilter;
+      radiographTex.magFilter = THREE.LinearFilter;
+      radiographTex.encoding = THREE.sRGBEncoding;
+
+      const innerTex = textureLoader.load(`/static/boards/mat_traces.png`);
+      innerTex.encoding = THREE.sRGBEncoding;
+
+      // 1. Translucent Dielectric FR4 Glass Substrate Box (with Cyan glowing edge)
+      const substrateGeo = new THREE.BoxGeometry(boardW, boardT, boardL);
+      const glassEdgeMat = new THREE.MeshBasicMaterial({
+        color: 0x06b6d4,
+        transparent: true,
+        opacity: 0.65,
+        wireframe: false
+      });
+      const substrateTopMat = new THREE.MeshBasicMaterial({
+        map: radiographTex,
+        transparent: true,
+        opacity: 0.95
+      });
+      const substrateBottomMat = new THREE.MeshBasicMaterial({
+        color: 0x042f2e,
+        transparent: true,
+        opacity: 0.70
+      });
+
+      const materials = [glassEdgeMat, glassEdgeMat, substrateTopMat, substrateBottomMat, glassEdgeMat, glassEdgeMat];
+      pcbSubstrateMesh = new THREE.Mesh(substrateGeo, materials);
+      pcbSubstrateMesh.position.y = 0;
+      scene.add(pcbSubstrateMesh);
+
+      const planeGeo = new THREE.PlaneGeometry(boardW, boardL);
+
+      // Top Subsurface Radiograph Layer
+      const topMat = new THREE.MeshBasicMaterial({
+        map: radiographTex,
+        transparent: true,
+        opacity: 1.0,
+        side: THREE.DoubleSide
+      });
+      topRadiographMesh = new THREE.Mesh(planeGeo, topMat);
+      topRadiographMesh.rotation.x = -Math.PI / 2;
+      topRadiographMesh.position.y = boardT / 2 + 0.05;
+      scene.add(topRadiographMesh);
+
+      // Inner Copper Traces Plane
+      const innerMat = new THREE.MeshBasicMaterial({
+        map: innerTex,
+        transparent: true,
+        opacity: 0.75,
+        side: THREE.DoubleSide
+      });
+      innerCopperMesh = new THREE.Mesh(planeGeo, innerMat);
+      innerCopperMesh.rotation.x = -Math.PI / 2;
+      innerCopperMesh.position.y = 0;
+      scene.add(innerCopperMesh);
+
+      // 4 Corner Metal Mounting Ring Cutouts (as in screenshot)
+      const ringPositions = [
+        [-43, -43], [43, -43], [-43, 43], [43, 43]
+      ];
+      ringPositions.forEach(pos => {
+        const ringGeo = new THREE.RingGeometry(2.2, 3.8, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: 0x94a3b8,
+          side: THREE.DoubleSide
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = -Math.PI / 2;
+        ringMesh.position.set(pos[0], boardT / 2 + 0.08, pos[1]);
+        scene.add(ringMesh);
+        cornerRings.push(ringMesh);
+      });
+
+      buildDefectOverlayAndBadges();
+    }
+
+    function buildDefectOverlayAndBadges() {
+      const bannerEl = document.getElementById("defectAlertBanner");
+      bannerEl.innerHTML = "";
+      closeDefectInspector();
+
+      const defects = DEFECT_DATABASE[activeBoardId] || [];
+
+      if (defects.length === 0) {
+        bannerEl.innerHTML = `
+          <div class="defect-badge-pill defect-badge-pass">
+            <i class="fa-solid fa-circle-check"></i> IPC CLASS 3 PASS (100% Zero Subsurface Defects)
+          </div>
+        `;
+        return;
+      }
+
+      // Summary Tag
+      const summaryTag = document.createElement("div");
+      summaryTag.className = "defect-badge-pill defect-badge-fail";
+      summaryTag.style.fontWeight = "800";
+      summaryTag.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${defects.length} DEFECTS DETECTED`;
+      bannerEl.appendChild(summaryTag);
+
+      defects.forEach((d, idx) => {
+        // Top Pill Button
+        const pill = document.createElement("div");
+        pill.className = "defect-badge-pill defect-badge-fail";
+        pill.innerHTML = `<i class="fa-solid ${d.icon}"></i> ${d.id}`;
+        pill.onclick = () => focusDefect(d);
+        bannerEl.appendChild(pill);
+
+        // 3D Visual Target Beacon & Calling Label
+        // 1. Double Target Ring
+        const ringGeo1 = new THREE.RingGeometry(2.4, 3.2, 32);
+        const ringMat1 = new THREE.MeshBasicMaterial({
+          color: d.color,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.95
+        });
+        const ringMesh1 = new THREE.Mesh(ringGeo1, ringMat1);
+        ringMesh1.rotation.x = -Math.PI / 2;
+        ringMesh1.position.set(d.x, boardT / 2 + 0.12, d.z);
+        ringMesh1.userData = d;
+        anomalyMarkersGroup.add(ringMesh1);
+        pulsingBeacons.push(ringMesh1);
+
+        // 2. Vertical Laser Beacon Line
+        const lineGeo = new THREE.CylinderGeometry(0.2, 0.2, 8, 8);
+        const lineMat = new THREE.MeshBasicMaterial({
+          color: d.color,
+          transparent: true,
+          opacity: 0.75
+        });
+        const lineMesh = new THREE.Mesh(lineGeo, lineMat);
+        lineMesh.position.set(d.x, boardT / 2 + 4.1, d.z);
+        lineMesh.userData = d;
+        anomalyMarkersGroup.add(lineMesh);
+
+        // 3. Floating Glowing Sphere
+        const sphereGeo = new THREE.SphereGeometry(0.9, 16, 16);
+        const sphereMat = new THREE.MeshBasicMaterial({ color: d.color });
+        const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+        sphereMesh.position.set(d.x, boardT / 2 + 8.2, d.z);
+        sphereMesh.userData = d;
+        anomalyMarkersGroup.add(sphereMesh);
+
+        // 4. Text Sprite Tag
+        const spriteCanvas = document.createElement('canvas');
+        spriteCanvas.width = 300;
+        spriteCanvas.height = 64;
+        const ctx = spriteCanvas.getContext('2d');
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.strokeStyle = (d.color === 0xef4444) ? '#ef4444' : '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(4, 4, 292, 56, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 22px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`⚠️ ${d.id}`, 150, 32);
+
+        const spriteTexture = new THREE.CanvasTexture(spriteCanvas);
+        const spriteMat = new THREE.SpriteMaterial({ map: spriteTexture, transparent: true });
+        const sprite = new THREE.Sprite(spriteMat);
+        sprite.position.set(d.x, boardT / 2 + 12.0, d.z);
+        sprite.scale.set(16, 3.4, 1);
+        sprite.userData = d;
+        anomalyMarkersGroup.add(sprite);
+      });
+    }
+
+    function focusDefect(d) {
+      isAutoRotating = false;
+      controls.autoRotate = false;
+      const btn = document.getElementById("btnAutoRotate");
+      if (btn) btn.classList.remove("active");
+
+      // Fly camera to target
+      camera.position.set(d.x + 16, 26, d.z + 24);
+      controls.target.set(d.x, boardT / 2, d.z);
+      controls.update();
+
+      showDefectInspector(d);
+    }
+
+    function showDefectInspector(d) {
+      const modal = document.getElementById("defectInspectorModal");
+      document.getElementById("inspDefectTitle").innerText = d.title;
+      document.getElementById("inspComponent").innerText = d.component;
+      document.getElementById("inspViolation").innerText = d.violation;
+      document.getElementById("inspStandard").innerText = d.standard;
+      document.getElementById("inspDepth").innerText = d.depth;
+      document.getElementById("inspAction").innerHTML = `<strong style="color: #f87171;">Recommended Action:</strong> ${d.action}`;
+      modal.style.display = "block";
+    }
+
+    function closeDefectInspector() {
+      const modal = document.getElementById("defectInspectorModal");
+      if (modal) modal.style.display = "none";
+    }
+
+    function onPointerClick(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(anomalyMarkersGroup.children, true);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        if (hit.userData && hit.userData.id) {
+          focusDefect(hit.userData);
+        }
+      }
+    }
+
+    function switchMainVisualMode(mode) {
+      currentMainMode = mode;
+      currentMaterialFilter = "all";
+
+      const btns = [
+        { id: "btnModeXRay", mode: "multispectral" },
+        { id: "btnModeInferno", mode: "inferno" },
+        { id: "btnModeGray", mode: "gray" },
+        { id: "btnModeBlue", mode: "jet" }
+      ];
+
+      btns.forEach(b => {
+        const el = document.getElementById(b.id);
+        if (el) el.classList.toggle("active", b.mode === mode);
+      });
+
+      updateCardActiveClasses("all");
+      buildBoardScene();
+    }
+
+    function selectMaterialFilter(filterName) {
+      currentMaterialFilter = filterName;
+      updateCardActiveClasses(filterName);
+
+      document.querySelectorAll(".top-mode-btn").forEach(btn => btn.classList.remove("active"));
+      const xBtn = document.getElementById("btnModeXRay");
+      if (xBtn) xBtn.classList.add("active");
+
+      buildBoardScene();
+    }
+
+    function updateCardActiveClasses(activeKey) {
+      const cards = {
+        all: "cardAll",
+        traces: "cardTraces",
+        chips: "cardChips",
+        passives: "cardPassives",
+        vias: "cardVias",
+        solder: "cardSolder",
+        substrate: "cardSubstrate"
+      };
+
+      Object.entries(cards).forEach(([k, id]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle("active", k === activeKey);
+      });
+    }
+
+    async function handleBoardSelection(boardId) {
+      if (boardId === "ACTIVE_LIVE") {
+        if (typeof getGlobalActiveBoard === 'function') {
+          const active = await getGlobalActiveBoard();
+          if (active) {
+            syncActiveBoard(active);
+            return;
+          }
+        }
+      }
+
+      customModeDataUrls = null;
+      activeCustomImageSrc = null;
+      activeBoardId = boardId;
+      buildBoardScene();
+
+      const defects = DEFECT_DATABASE[boardId] || [];
+      if (defects.length > 0) {
+        focusDefect(defects[0]);
+      } else {
+        setCameraView("isometric");
+      }
+    }
+
+    async function syncActiveBoard(boardInfo) {
+      if (!boardInfo) return;
+      const bId = boardInfo.board_id || boardInfo.serial || 'TB005';
+      const select = document.getElementById("boardScenarioSelect");
+      if (select) {
+        let found = false;
+        for (let opt of select.options) {
+          if (opt.value === bId) {
+            select.value = bId;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          select.value = "ACTIVE_LIVE";
+        }
+      }
+
+      activeBoardId = bId;
+      customModeDataUrls = null;
+      activeCustomImageSrc = null;
+
+      // If custom uploaded board from page 1, process radiographs
+      if (boardInfo.image_b64 || (boardInfo.image_url && boardInfo.image_url.includes('active_custom_board'))) {
+        try {
+          const imgSrc = boardInfo.image_b64 ? `data:image/png;base64,${boardInfo.image_b64}` : boardInfo.image_url;
+          activeCustomImageSrc = imgSrc;
+          const blob = await fetch(imgSrc).then(r => r.blob());
+          const fd = new FormData();
+          fd.append("image", blob, `${bId}.png`);
+          const res = await fetch("/api/xray/process-custom", { method: "POST", body: fd });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.modes) customModeDataUrls = data.modes;
+          }
+        } catch (e) {
+          console.warn("Radiograph sync custom error:", e);
+        }
+      }
+
+      buildBoardScene();
+      const defects = DEFECT_DATABASE[activeBoardId] || [];
+      if (defects.length > 0) {
+        focusDefect(defects[0]);
+      } else if (boardInfo.verdict === "FAIL") {
+        const dynamicDefect = {
+          id: `${bId} Anomaly`,
+          title: `Subsurface Anomaly (${boardInfo.defective_components || 1} Defects)`,
+          component: "Inspected PCB Structure",
+          violation: "Optical / Depth Verification Failed",
+          standard: "IPC-A-610 Class 3",
+          depth: "Z = Defect Layer",
+          action: "Perform automated radiograph inspection and micro-sectioning.",
+          x: 0.0,
+          z: 0.0,
+          color: 0xef4444,
+          icon: "fa-triangle-exclamation"
+        };
+        DEFECT_DATABASE[activeBoardId] = [dynamicDefect];
+        buildDefectOverlayAndBadges();
+        focusDefect(dynamicDefect);
+      } else {
+        setCameraView("isometric");
+      }
+    }
+
+    if (typeof getGlobalActiveBoard === 'function') {
+      getGlobalActiveBoard().then(active => {
+        if (active && (active.board_id || active.serial)) {
+          syncActiveBoard(active);
+        }
+      });
+    }
+
+    if (typeof onGlobalActiveBoardChange === 'function') {
+      onGlobalActiveBoardChange(syncActiveBoard);
+    }
+
+    async function handleDirectImageUpload(e) {
+      if (!e.target.files.length) return;
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        activeCustomImageSrc = ev.target.result;
+        activeBoardId = file.name.replace(/\.[^/.]+$/, "");
+        
+        try {
+          const formData = new FormData();
+          formData.append("image", file);
+          const res = await fetch("/api/xray/process-custom", {
+            method: "POST",
+            body: formData
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.modes) {
+              customModeDataUrls = data.modes;
+            }
+          }
+        } catch (err) {
+          console.warn("Upload radiograph fallback:", err);
+        }
+        buildBoardScene();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateExplodedStack(val) {
+      const sep = parseFloat(val) * 0.4;
+      if (topRadiographMesh) topRadiographMesh.position.y = (boardT / 2 + 0.05) + sep * 1.5;
+      if (innerCopperMesh) innerCopperMesh.position.y = 0;
+      cornerRings.forEach(r => r.position.y = (boardT / 2 + 0.08) + sep * 1.5);
+      anomalyMarkersGroup.position.y = sep * 1.5;
+    }
+
+    function updateZClip(val) {
+      const depthRatio = parseFloat(val) / 1600.0;
+      const clipY = (depthRatio - 0.5) * boardT * 2.5;
+      const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), clipY + 2.0);
+      renderer.clippingPlanes = [clipPlane];
+    }
+
+    function setCameraView(mode) {
+      if (mode === "isometric") {
+        camera.position.set(0, 75, 88);
+      } else if (mode === "top") {
+        camera.position.set(0, 110, 0);
+      } else if (mode === "side") {
+        camera.position.set(0, 2, 110);
+      }
+      controls.target.set(0, 0, 0);
+      controls.update();
+    }
+
+    function toggleAutoRotate() {
+      isAutoRotating = !isAutoRotating;
+      controls.autoRotate = isAutoRotating;
+      const btn = document.getElementById("btnAutoRotate");
+      if (btn) btn.classList.toggle("active", isAutoRotating);
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById("webglCanvas").parentElement;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
+
+      // Pulsing effect for defect target rings
+      pulsingBeacons.forEach(mesh => {
+        const scale = 1.0 + Math.sin(elapsedTime * 4.0) * 0.18;
+        mesh.scale.set(scale, scale, 1);
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

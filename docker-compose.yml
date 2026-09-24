@@ -1,0 +1,16 @@
+services:
+  pcb-aoi-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pcb_inspection_server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server/reference:/app/server/reference
+      - ./server/audit:/app/server/audit
+      - ./evaluation/test_boards:/app/evaluation/test_boards
+    environment:
+      - LOG_LEVEL=INFO
+      - PCB_AOI_API_KEY=
+    restart: unless-stopped

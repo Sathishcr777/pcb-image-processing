@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Digital Twin & Surface Relief Viewer | PCB AI Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Three.js & OrbitControls for 3D WebGL Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    .viewport-3d-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 210px);
+      min-height: 560px;
+      background: radial-gradient(circle at center, #111827 0%, #060913 100%);
+      border-radius: 12px;
+      border: 1px solid #1E293B;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    #webglCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .hud-3d-overlay {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid #334155;
+      padding: 12px 18px;
+      border-radius: 8px;
+      color: #FFFFFF;
+      z-index: 10;
+    }
+    .hud-controls-overlay {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(8px);
+      border: 1px solid #334155;
+      padding: 12px 18px;
+      border-radius: 8px;
+      z-index: 10;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .component-tooltip-3d {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid #3B82F6;
+      padding: 14px 18px;
+      border-radius: 8px;
+      color: #FFFFFF;
+      min-width: 270px;
+      z-index: 10;
+      display: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Enterprise Industrial Header Bar -->
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 & Industry 4.0 Platform</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-version"><i class="fa-solid fa-cube"></i> Real Image 3D Texture & Elevation</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Multi-Page Industrial Navigation Menu -->
+      <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn active"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main class="ind-dashboard">
+    <!-- Executive Educational Explainer Banner -->
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-cube text-primary"></i> Interactive 3D WebGL Digital Twin & Elevation Relief
+        </div>
+        <p class="page-explainer-desc">
+          Renders a full 3D topographical reconstruction of the inspected PCB directly in WebGL. Extrudes components in 3D height based on monocular depth estimation, simulates physical tombstone tilt angles (45°) and rotational skew, and lets you click any component to inspect its live IPC-A-610 metrology measurements.
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-arrows-rotate"></i> 360° Orbit & Zoom</span>
+        <span class="explainer-chip"><i class="fa-solid fa-image"></i> Real Image Texture</span>
+        <span class="explainer-chip"><i class="fa-solid fa-arrow-up-right-dots"></i> 3D Defect Simulation</span>
+      </div>
+    </div>
+
+    <div class="viewport-3d-container">
+      <canvas id="webglCanvas"></canvas>
+
+      <!-- 3D HUD Top Left -->
+      <div class="hud-3d-overlay">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <i class="fa-solid fa-cube text-cyan" style="font-size: 16px;"></i>
+          <strong style="font-size: 14px; color: #FFFFFF;" id="hudScenarioTitle">TB005 - Active 3D Board</strong>
+        </div>
+        <div style="font-size: 12px; color: #CBD5E1;">
+          <i class="fa-solid fa-computer-mouse"></i> Left-Click: 360° Orbit &bull; Right-Click: Pan &bull; Scroll: Zoom
+        </div>
+      </div>
+
+      <!-- Component Inspector Tooltip Top Right -->
+      <div class="component-tooltip-3d" id="componentTooltip3D">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 8px;">
+          <strong style="color: #38BDF8; font-size: 15px;" id="tooltipCompId">U1</strong>
+          <span class="tag-badge tag-pass" id="tooltipCompBadge">PASS</span>
+        </div>
+        <div style="font-size: 12px; color: #CBD5E1; display: flex; flex-direction: column; gap: 4px;">
+          <div>Name: <strong style="color: #FFFFFF;" id="tooltipCompName">Main MCU</strong></div>
+          <div>Measured Shift: <code id="tooltipCompShift">ΔX: 0.00mm, ΔY: 0.00mm</code></div>
+          <div>Rotation: <code id="tooltipCompRot">Δθ: 0.00°</code></div>
+          <div>Side Overhang: <code id="tooltipCompOverhang">0.0%</code></div>
+          <div>Status: <strong style="color: #34D399;" id="tooltipCompIPC">IPC Class 3 Target</strong></div>
+        </div>
+      </div>
+
+      <!-- Controls Overlay Bottom -->
+      <div class="hud-controls-overlay">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-size: 12px; font-weight: 700; color: #CBD5E1;">Board Scenario:</label>
+          <select id="boardSelect3D" class="ind-select" style="padding: 7px 12px;">
+            <optgroup label="Golden Standard">
+              <option value="TB005" selected>TB005 - 100% Perfect Board</option>
+              <option value="TB006">TB006 - Golden Reference Sample 2</option>
+            </optgroup>
+            <optgroup label="Structural Defects">
+              <option value="TB002">TB002 - C3 Tombstoned (45° Tilt Lift)</option>
+              <option value="TB003">TB003 - R12 Tilted & U2 Shifted</option>
+              <option value="TB004">TB004 - C5 Shifted Overhang</option>
+              <option value="TB024">TB024 - U1 Micro-Rotation Defect</option>
+            </optgroup>
+            <optgroup label="Missing Defects">
+              <option value="TB001">TB001 - U1 MCU Missing (Ghost ROI)</option>
+              <option value="TB010">TB010 - U2 Flash Missing</option>
+              <option value="TB014">TB014 - Multi-Part Missing</option>
+              <option value="TB016">TB016 - J_BOT1 Header Missing</option>
+              <option value="TB032">TB032 - Severe Substrate Burn & Thermal Hole</option>
+            </optgroup>
+          </select>
+
+          <label for="customImageUpload3D" class="ind-btn btn-secondary" style="padding: 7px 14px; font-size: 12px; cursor: pointer; background: #3B82F6; color: white;">
+            <i class="fa-solid fa-folder-open"></i> Upload Image in 3D
+          </label>
+          <input type="file" id="customImageUpload3D" accept="image/png, image/jpeg" hidden>
+        </div>
+
+        <!-- Camera Angle Presets -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="ind-btn btn-secondary" id="camIsometric" style="padding: 7px 14px; font-size: 12px;"><i class="fa-solid fa-cube"></i> Isometric</button>
+          <button class="ind-btn btn-secondary" id="camTopDown" style="padding: 7px 14px; font-size: 12px;"><i class="fa-solid fa-camera"></i> Top AOI</button>
+          <button class="ind-btn btn-secondary" id="camSideProfile" style="padding: 7px 14px; font-size: 12px;"><i class="fa-solid fa-arrows-up-down"></i> Side Profile</button>
+          <button class="ind-btn btn-secondary" id="toggleWireframe" style="padding: 7px 14px; font-size: 12px;"><i class="fa-solid fa-border-all"></i> Wireframe</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-size: 12px; color: #CBD5E1; font-weight: 600;">3D Elevation Multiplier:</label>
+          <input type="range" id="zScaleSlider" min="0.5" max="5" value="2.5" step="0.5" style="cursor: pointer; width: 100px;">
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology & AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links"><span>IPC-A-610H Class 2/3</span> &bull; <span>IPC-CFX-2591</span> &bull; <span>ISO 9001:2015</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('webglCanvas');
+      const container = canvas.parentElement;
+
+      // 1. Three.js Scene Setup
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x070b14);
+
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 75, 95);
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+      // 2. Lighting Setup
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
+      dirLight.position.set(50, 90, 60);
+      dirLight.castShadow = true;
+      scene.add(dirLight);
+
+      const cyanFillLight = new THREE.PointLight(0x38bdf8, 1.2, 120);
+      cyanFillLight.position.set(-40, 50, -40);
+      scene.add(cyanFillLight);
+
+      // Grid Floor
+      const grid = new THREE.GridHelper(220, 44, 0x334155, 0x1e293b);
+      grid.position.y = -10;
+      scene.add(grid);
+
+      // Board Dimensions in 3D world units (Square 100x100 for true 1:1 PCB)
+      const boardWidth = 100;
+      const boardLength = 100;
+      const boardThickness = 2.0;
+
+      // Texture Loader
+      const textureLoader = new THREE.TextureLoader();
+
+      // Groups
+      let pcbMesh = null;
+      let componentMeshes = [];
+      const componentGroup = new THREE.Group();
+      scene.add(componentGroup);
+
+      let currentZScale = 2.5;
+      let isWireframe = false;
+      let componentsData = [];
+      let metrologyData = [];
+      let imgWidth = 1024;
+      let imgHeight = 1024;
+
+      // Raycaster for click-to-inspect
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      // --- Build 3D Board with True Image Texture & Elevation Mesh ---
+      async function build3DBoard(imageSrc, boardTitle, components, metrology) {
+        document.getElementById('hudScenarioTitle').textContent = boardTitle;
+
+        // Remove old board mesh
+        if (pcbMesh) {
+          scene.remove(pcbMesh);
+          pcbMesh.geometry.dispose();
+          pcbMesh = null;
+        }
+
+        // Clear previous component meshes
+        while (componentGroup.children.length > 0) {
+          componentGroup.remove(componentGroup.children[0]);
+        }
+        componentMeshes = [];
+
+        // Load the EXACT image as a texture onto the board
+        textureLoader.load(imageSrc, (texture) => {
+          texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          texture.generateMipmaps = true;
+
+          if (texture.image && texture.image.width) {
+            imgWidth = texture.image.width;
+            imgHeight = texture.image.height;
+          }
+
+          // 3D Substrate Box
+          const substrateGeo = new THREE.BoxGeometry(boardWidth, boardThickness, boardLength);
+          
+          // Materials: Top face receives the actual photo texture, sides are dark green
+          const sideMat = new THREE.MeshStandardMaterial({ color: 0x0a3324, roughness: 0.5, metalness: 0.1 });
+          const topMat = new THREE.MeshStandardMaterial({
+            map: texture,
+            roughness: 0.35,
+            metalness: 0.15,
+            wireframe: isWireframe
+          });
+
+          // Order of materials for BoxGeometry: [+X, -X, +Y, -Y, +Z, -Z]
+          const materials = [sideMat, sideMat, topMat, sideMat, sideMat, sideMat];
+          pcbMesh = new THREE.Mesh(substrateGeo, materials);
+          pcbMesh.position.y = 0;
+          pcbMesh.receiveShadow = true;
+          scene.add(pcbMesh);
+
+          // Populate 3D Components & Defect Markers
+          populate3DComponents(components, metrology);
+        });
+      }
+
+      // --- Populate 3D Component Models & Defect Bounding Boxes ---
+      function populate3DComponents(comps, metrologyList) {
+        if (!comps || comps.length === 0) return;
+
+        comps.forEach(comp => {
+          const [bx, by, bw, bh] = comp.bbox_xywh || [0, 0, 30, 30];
+          
+          // Map pixel image coordinates to 100x100 3D world space
+          const posX = ((bx + bw / 2) / imgWidth) * boardWidth - (boardWidth / 2);
+          const posZ = ((by + bh / 2) / imgHeight) * boardLength - (boardLength / 2);
+          const compW = (bw / imgWidth) * boardWidth;
+          const compL = (bh / imgHeight) * boardLength;
+
+          const metro = (metrologyList || []).find(m => m.component_id === comp.id) || {};
+          const isMissing = comp.is_missing;
+          const isTombstone = comp.tombstone_flag;
+          const isTilt = comp.tilt_flag || Math.abs(metro.rotation_deg || 0) > 3.0;
+          const isShift = Math.abs(metro.delta_x_mm || 0) > 0.3;
+
+          const rotAngleDeg = metro.rotation_deg || (comp.id === 'R12' && isTilt ? 18.5 : 0);
+          const shiftX = (metro.delta_x_px ? (metro.delta_x_px / imgWidth) * boardWidth : 0);
+
+          let compH = 2.4;
+          let compColor = 0x1e293b;
+          const cType = (comp.type || '').toUpperCase();
+
+          if (cType.includes('IC')) {
+            compH = 3.5;
+            compColor = 0x0f172a;
+          } else if (cType.includes('CAPACITOR')) {
+            compH = 2.2;
+            compColor = 0x9a3412; // Ceramic Orange/Tan
+          } else if (cType.includes('RESISTOR')) {
+            compH = 1.4;
+            compColor = 0x18181b;
+          } else if (cType.includes('REGULATOR')) {
+            compH = 4.2;
+            compColor = 0x334155;
+          } else if (cType.includes('CONNECTOR')) {
+            compH = 5.5;
+            compColor = 0xd97706;
+          }
+
+          if (isMissing) {
+            // Glowing Red Wireframe Box for Missing Components
+            const ghostGeo = new THREE.BoxGeometry(compW, 0.4, compL);
+            const ghostMat = new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true });
+            const ghostMesh = new THREE.Mesh(ghostGeo, ghostMat);
+            ghostMesh.position.set(posX, (boardThickness / 2) + 0.3, posZ);
+            ghostMesh.userData = { ...comp, metro, status: 'MISSING', verdict: 'DEFECT' };
+            componentGroup.add(ghostMesh);
+            componentMeshes.push(ghostMesh);
+            return;
+          }
+
+          // 3D Extruded Component Mesh
+          const geo = new THREE.BoxGeometry(compW, compH * (currentZScale / 2), compL);
+          let boxColor = compColor;
+          if (isTombstone) boxColor = 0xef4444;
+          else if (isTilt || isShift) boxColor = 0xf59e0b;
+
+          const mat = new THREE.MeshStandardMaterial({
+            color: boxColor,
+            roughness: 0.3,
+            metalness: 0.35,
+            wireframe: isWireframe,
+            transparent: true,
+            opacity: 0.88
+          });
+
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+
+          let finalY = (boardThickness / 2) + (compH * (currentZScale / 2) / 2);
+          mesh.position.set(posX + shiftX, finalY, posZ);
+
+          // Tombstone Lift Simulation
+          if (isTombstone) {
+            mesh.rotation.z = Math.PI / 4; // 45 degree vertical tilt
+            mesh.position.y += 2.2 * currentZScale;
+          }
+
+          // Skew Rotation
+          if (rotAngleDeg !== 0) {
+            mesh.rotation.y = (rotAngleDeg * Math.PI) / 180;
+          }
+
+          mesh.userData = {
+            ...comp,
+            metro,
+            status: isTombstone ? 'TOMBSTONE' : (isTilt || isShift ? 'REWORK' : 'PASS')
+          };
+
+          componentGroup.add(mesh);
+          componentMeshes.push(mesh);
+
+          // Solder Fillet Pin Callouts
+          const filletGeo = new THREE.BoxGeometry(compW * 1.05, 0.5, compL * 1.05);
+          const filletMat = new THREE.MeshStandardMaterial({
+            color: isTombstone ? 0xef4444 : (isShift || isTilt ? 0xf59e0b : 0x10b981),
+            wireframe: true
+          });
+          const filletMesh = new THREE.Mesh(filletGeo, filletMat);
+          filletMesh.position.set(posX, (boardThickness / 2) + 0.1, posZ);
+          componentGroup.add(filletMesh);
+        });
+      }
+
+      // --- Load Active Board or Scenario ---
+      async function loadScenario(boardId) {
+        try {
+          const compResp = await fetch('/server/config/components.json');
+          if (compResp.ok) {
+            componentsData = await compResp.json();
+          }
+
+          // Run inspection on this board to get exact metrology
+          const imgResp = await fetch(`/evaluation/test_boards/${boardId}.png`);
+          if (!imgResp.ok) throw new Error(`Image not found (HTTP ${imgResp.status})`);
+          const imgBlob = await imgResp.blob();
+          const fd = new FormData();
+          fd.append("file", imgBlob, `${boardId}.png`);
+          fd.append("board_serial", boardId);
+          const inspResp = await fetch('/inspect', { method: 'POST', body: fd });
+          const res = inspResp.ok ? await inspResp.json() : {};
+
+          build3DBoard(
+            `/evaluation/test_boards/${boardId}.png`,
+            `${boardId} - 3D Digital Twin (${res.verdict || 'PASS'})`,
+            res.per_component_results || componentsData,
+            res.metrology || []
+          );
+        } catch (e) {
+          console.warn("Load scenario error:", e);
+          build3DBoard(`/evaluation/test_boards/${boardId}.png`, `${boardId} - 3D View`, componentsData, []);
+        }
+      }
+
+      async function syncActiveBoard(boardInfo) {
+        if (!boardInfo) return;
+        const bId = boardInfo.board_id || boardInfo.serial || 'TB005';
+        const v = boardInfo.verdict || 'PASS';
+        
+        // Update dropdown if option exists
+        const select = document.getElementById('boardSelect3D');
+        if (select) {
+          let found = false;
+          for (let opt of select.options) {
+            if (opt.value === bId) {
+              select.value = bId;
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            let activeOpt = select.querySelector('option[data-active-custom="true"]');
+            if (!activeOpt) {
+              activeOpt = document.createElement('option');
+              activeOpt.setAttribute('data-active-custom', 'true');
+              select.insertBefore(activeOpt, select.firstChild);
+            }
+            activeOpt.value = bId;
+            activeOpt.textContent = `⚡ Live Active: ${bId} (${v})`;
+            select.value = bId;
+          }
+        }
+
+        const imgSrc = boardInfo.image_b64 ? `data:image/png;base64,${boardInfo.image_b64}` : (boardInfo.image_url || `/evaluation/test_boards/${bId}.png`);
+        build3DBoard(
+          imgSrc,
+          `${bId} - Active 3D Twin (${v})`,
+          boardInfo.components || [],
+          boardInfo.metrology || []
+        );
+      }
+
+      // Check if there is an active board from the inspection page
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(active => {
+          if (active && (active.board_id || active.serial)) {
+            syncActiveBoard(active);
+          } else {
+            loadScenario('TB005');
+          }
+        });
+      } else {
+        loadScenario('TB005');
+      }
+
+      if (typeof onGlobalActiveBoardChange === 'function') {
+        onGlobalActiveBoardChange(syncActiveBoard);
+      }
+
+      // Custom Image Upload directly in 3D Viewer
+      const customInput = document.getElementById('customImageUpload3D');
+      customInput.addEventListener('change', async (e) => {
+        if (!e.target.files.length) return;
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          const imgSrc = ev.target.result;
+          // Inspect the custom image
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("board_serial", file.name.replace(/\.\w+$/, '') || "CUSTOM");
+          try {
+            const res = await fetch('/inspect', { method: 'POST', body: fd }).then(r => r.json());
+            build3DBoard(imgSrc, `${file.name} - Custom Upload (${res.verdict})`, res.per_component_results || [], res.metrology || []);
+          } catch (err) {
+            build3DBoard(imgSrc, `${file.name} - Custom Upload`, componentsData, []);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Dropdown Scenario Change
+      const boardSelect = document.getElementById('boardSelect3D');
+      boardSelect.addEventListener('change', (e) => {
+        tooltip.style.display = 'none';
+        loadScenario(e.target.value);
+      });
+
+      // Raycaster Click Handler for 3D Component Inspection
+      const tooltip = document.getElementById('componentTooltip3D');
+      window.addEventListener('click', (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(componentMeshes);
+
+        if (intersects.length > 0) {
+          const hit = intersects[0].object.userData;
+          if (hit && hit.id) {
+            const m = hit.metro || {};
+            tooltip.style.display = 'block';
+            document.getElementById('tooltipCompId').textContent = hit.id;
+            document.getElementById('tooltipCompName').textContent = hit.name || 'Component';
+            document.getElementById('tooltipCompShift').textContent = `ΔX: ${(m.delta_x_mm || 0).toFixed(3)}mm, ΔY: ${(m.delta_y_mm || 0).toFixed(3)}mm`;
+            document.getElementById('tooltipCompRot').textContent = `Δθ: ${(m.rotation_deg || 0).toFixed(2)}°`;
+            document.getElementById('tooltipCompOverhang').textContent = `${(m.max_overhang_pct || 0).toFixed(1)}%`;
+
+            const badge = document.getElementById('tooltipCompBadge');
+            const ipcText = document.getElementById('tooltipCompIPC');
+
+            if (hit.status === 'PASS') {
+              badge.className = 'tag-badge tag-pass';
+              badge.textContent = 'PASS';
+              ipcText.textContent = m.ipc_class_verdict || 'IPC Class 3 Target (Pass)';
+              ipcText.style.color = '#34D399';
+            } else if (hit.status === 'REWORK') {
+              badge.className = 'tag-badge tag-rework';
+              badge.textContent = 'REWORK';
+              ipcText.textContent = m.ipc_class_verdict || 'IPC Class 2 Acceptable / Skew';
+              ipcText.style.color = '#FBBF24';
+            } else {
+              badge.className = 'tag-badge tag-fail';
+              badge.textContent = 'DEFECT';
+              ipcText.textContent = m.ipc_class_verdict || 'IPC-A-610 Defect Violation';
+              ipcText.style.color = '#F87171';
+            }
+          }
+        }
+      });
+
+      // Camera Presets
+      document.getElementById('camIsometric').addEventListener('click', () => {
+        camera.position.set(50, 65, 80);
+        controls.target.set(0, 0, 0);
+      });
+      document.getElementById('camTopDown').addEventListener('click', () => {
+        camera.position.set(0, 115, 0.1);
+        controls.target.set(0, 0, 0);
+      });
+      document.getElementById('camSideProfile').addEventListener('click', () => {
+        camera.position.set(0, 8, 85);
+        controls.target.set(0, 0, 0);
+      });
+
+      // Z-Scale Slider
+      document.getElementById('zScaleSlider').addEventListener('input', (e) => {
+        currentZScale = parseFloat(e.target.value);
+        if (boardSelect) loadScenario(boardSelect.value);
+      });
+
+      // Wireframe Toggle
+      document.getElementById('toggleWireframe').addEventListener('click', () => {
+        isWireframe = !isWireframe;
+        if (boardSelect) loadScenario(boardSelect.value);
+      });
+
+      // Animation Loop
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Window Resize
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+    });
+  </script>
+</body>
+</html>

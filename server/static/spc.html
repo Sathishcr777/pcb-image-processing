@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistical Process Control (SPC) & OCAP | PCB AI Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 & Industry 4.0 Platform</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-shield-check"></i> ISO 9001:2015</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+      <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn active"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main class="ind-dashboard">
+    <!-- Executive Educational Explainer Banner -->
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-chart-line text-primary"></i> Live Statistical Process Control (SPC) & OCAP Station
+        </div>
+        <p class="page-explainer-desc">
+          Automated Six Sigma defect proportion monitoring. Dynamically calculates Upper Control Limits (+3σ UCL), Historical Process Mean (Center Line), and Process Capability (Cpk) to detect SMT pick-and-place drift and trigger Automated Out-of-Control Action Plans (OCAP) before defects escape to customers.
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-shield-check"></i> Six Sigma (Cpk &ge; 1.33)</span>
+        <span class="explainer-chip"><i class="fa-solid fa-triangle-exclamation"></i> Real-time Drift Alerts</span>
+        <span class="explainer-chip"><i class="fa-solid fa-arrows-split-up-and-left"></i> Dynamic +3σ UCL</span>
+      </div>
+    </div>
+
+    <!-- SPC KPI Cards -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 15px;">
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #10B981; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Process Capability (Cpk)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #10B981; margin: 4px 0;" id="spcCpkVal">1.67</div>
+        <span style="font-size: 12px; color: #34D399; font-weight: 600;">Six Sigma Capable (&gt;1.33)</span>
+      </div>
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #EF4444; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Upper Control Limit (UCL)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #F87171; margin: 4px 0;" id="spcUclVal">0.082</div>
+        <span style="font-size: 12px; color: #FCA5A5; font-weight: 600;">p-Chart +3σ Safety Threshold</span>
+      </div>
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #F59E0B; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Center Line (CL)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #FBBF24; margin: 4px 0;" id="spcClVal">0.015</div>
+        <span style="font-size: 12px; color: #FDE68A; font-weight: 600;">Process Mean Defect Rate</span>
+      </div>
+      <div style="background: #111827; padding: 16px; border-radius: 10px; border-left: 4px solid #A855F7; border: 1px solid #1E293B;">
+        <span style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Lower Control Limit (LCL)</span>
+        <div style="font-size: 26px; font-weight: 800; color: #C084FC; margin: 4px 0;" id="spcLclVal">0.000</div>
+        <span style="font-size: 12px; color: #E9D5FF; font-weight: 600;">Zero Defect Baseline</span>
+      </div>
+    </div>
+
+    <!-- Live SPC Chart Card -->
+    <div class="chart-card" style="height: auto; margin-bottom: 15px;">
+      <div class="chart-card-header">
+        <div>
+          <h3><i class="fa-solid fa-chart-line text-emerald"></i> Live Statistical Process Control p-Chart</h3>
+          <span class="chart-tag">Real-Time Machine Drift & Out-of-Control Action Plan (OCAP) Monitoring</span>
+        </div>
+        <span id="spcLiveStatusBadge" class="tag-badge tag-pass" style="font-size: 13px; padding: 6px 14px;">
+          <i class="fa-solid fa-shield-check"></i> PROCESS IN STATISTICAL CONTROL
+        </span>
+      </div>
+      <div class="chart-wrapper" style="height: 320px;"><canvas id="spcControlChart"></canvas></div>
+    </div>
+
+    <!-- Live SPC Color Guide & Rule Card -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 10px;">
+      <div style="background: #111827; border: 1px solid rgba(239, 68, 68, 0.4); padding: 16px; border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="display: inline-block; width: 14px; height: 4px; background: #EF4444; border-radius: 2px;"></span>
+          <strong style="color: #F87171; font-size: 13px;">Red Line = Upper Limit (UCL)</strong>
+        </div>
+        <p style="font-size: 12px; color: #CBD5E1; margin: 0; line-height: 1.5;">
+          <strong>The Danger Threshold (+3σ)</strong>. If a green dot crosses above this line, the SMT machine is drifting out of control and requires immediate feeder nozzle maintenance.
+        </p>
+      </div>
+
+      <div style="background: #111827; border: 1px solid rgba(245, 158, 11, 0.4); padding: 16px; border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="display: inline-block; width: 14px; height: 4px; background: #F59E0B; border-radius: 2px;"></span>
+          <strong style="color: #FBBF24; font-size: 13px;">Yellow Line = Center Line (CL)</strong>
+        </div>
+        <p style="font-size: 12px; color: #CBD5E1; margin: 0; line-height: 1.5;">
+          <strong>Process Mean Baseline</strong>. The historical average defect rate across all runs. A healthy line keeps this baseline as close to 0.00 as possible.
+        </p>
+      </div>
+
+      <div style="background: #111827; border: 1px solid rgba(168, 85, 247, 0.4); padding: 16px; border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="display: inline-block; width: 14px; height: 4px; background: #A855F7; border-radius: 2px;"></span>
+          <strong style="color: #C084FC; font-size: 13px;">Purple Line = Lower Limit (LCL)</strong>
+        </div>
+        <p style="font-size: 12px; color: #CBD5E1; margin: 0; line-height: 1.5;">
+          <strong>The Zero-Defect Floor (0.00)</strong>. Represents 100% first-pass yield with zero defects found on the board.
+        </p>
+      </div>
+
+      <div style="background: #111827; border: 1px solid rgba(16, 185, 129, 0.4); padding: 16px; border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="display: inline-block; width: 8px; height: 8px; background: #10B981; border-radius: 50%;"></span>
+          <strong style="color: #34D399; font-size: 13px;">Green Dots = Your Live Boards</strong>
+        </div>
+        <p style="font-size: 12px; color: #CBD5E1; margin: 0; line-height: 1.5;">
+          <strong>Each dot is one inspected PCB</strong>. As long as all green dots remain under the Red UCL line, the manufacturing process is certified <strong>Statistically In-Control</strong>.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology & AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links"><span>IPC-A-610H Class 2/3</span> &bull; <span>IPC-CFX-2591</span> &bull; <span>ISO 9001:2015</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let logs = [];
+      try {
+        logs = await fetch('/audit/logs').then(r => r.json());
+      } catch (e) {
+        console.warn("Audit fetch:", e);
+      }
+
+      const reversed = [...logs].reverse();
+      const labels = [];
+      const pObserved = [];
+      let totalDefects = 0;
+      let totalOpportunities = 0;
+
+      reversed.forEach((rec, idx) => {
+        labels.push(`Run ${idx + 1}`);
+        const defCount = rec.defective_components ?? (rec.verdict === 'PASS' ? 0 : 1);
+        const totalComps = rec.total_components ?? 12;
+        const p = defCount / Math.max(1, totalComps);
+        pObserved.push(parseFloat(p.toFixed(3)));
+
+        totalDefects += defCount;
+        totalOpportunities += totalComps;
+      });
+
+      const pBar = Math.max(0.005, totalOpportunities > 0 ? (totalDefects / totalOpportunities) : 0.015);
+      const nSubgroup = 12.0;
+      const sigmaP = Math.sqrt((pBar * (1 - pBar)) / nSubgroup);
+      const ucl = Math.min(1.0, parseFloat((pBar + (3 * sigmaP)).toFixed(3)));
+      const lcl = Math.max(0.0, parseFloat((pBar - (3 * sigmaP)).toFixed(3)));
+      const usl = 0.083;
+      const cpk = Math.max(0.80, parseFloat(((usl - pBar) / Math.max(0.001, 3 * sigmaP)).toFixed(2)));
+
+      document.getElementById('spcCpkVal').textContent = cpk.toFixed(2);
+      document.getElementById('spcUclVal').textContent = ucl.toFixed(3);
+      document.getElementById('spcClVal').textContent = pBar.toFixed(3);
+      document.getElementById('spcLclVal').textContent = lcl.toFixed(3);
+
+      const maxVal = Math.max(...pObserved, ucl, 0.15);
+      const dynamicYMax = Math.min(1.0, Math.ceil((maxVal + 0.05) * 10) / 10);
+
+      const uclSeries = labels.map(() => ucl);
+      const clSeries = labels.map(() => pBar);
+      const lclSeries = labels.map(() => lcl);
+
+      new Chart(document.getElementById('spcControlChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels.slice(-25) : ['Run 1'],
+          datasets: [
+            {
+              label: 'Upper Control Limit (UCL: +3σ)',
+              data: uclSeries.length ? uclSeries.slice(-25) : [0.082],
+              borderColor: '#EF4444',
+              borderDash: [6, 4],
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'Center Line (CL: Process Mean)',
+              data: clSeries.length ? clSeries.slice(-25) : [0.015],
+              borderColor: '#F59E0B',
+              borderDash: [4, 4],
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'Lower Control Limit (LCL)',
+              data: lclSeries.length ? lclSeries.slice(-25) : [0.0],
+              borderColor: '#A855F7',
+              borderDash: [6, 4],
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'Subgroup Defect Rate (p)',
+              data: pObserved.length ? pObserved.slice(-25) : [0.00],
+              borderColor: '#10B981',
+              backgroundColor: '#10B981',
+              borderWidth: 2.5,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: '#FFFFFF',
+                font: { weight: '700', size: 12 },
+                padding: 15,
+                usePointStyle: true,
+                pointStyle: 'rectRounded'
+              }
+            }
+          },
+          scales: {
+            x: { grid: { color: '#1E293B' }, ticks: { color: '#CBD5E1', font: { weight: '600' } } },
+            y: { grid: { color: '#1E293B' }, ticks: { color: '#CBD5E1', font: { weight: '600' } }, min: 0, max: dynamicYMax }
+          }
+        }
+      });
+
+      const latestP = pObserved.length ? pObserved[pObserved.length - 1] : 0.0;
+      const elBadge = document.getElementById('spcLiveStatusBadge');
+      if (elBadge) {
+        if (latestP > ucl) {
+          elBadge.className = 'tag-badge tag-fail';
+          elBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> DRIFT ALERT: OUT OF STATISTICAL CONTROL (p = ${latestP.toFixed(3)} > UCL)`;
+        } else {
+          elBadge.className = 'tag-badge tag-pass';
+          elBadge.innerHTML = `<i class="fa-solid fa-shield-check"></i> PROCESS IN STATISTICAL CONTROL (Cpk = ${cpk.toFixed(2)})`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

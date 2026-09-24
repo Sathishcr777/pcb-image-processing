@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISO 9001:2015 Audit Vault | PCB AI Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 & Industry 4.0 Platform</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-shield-check"></i> ISO 9001:2015</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+      <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn active"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main class="ind-dashboard">
+    <!-- Executive Educational Explainer Banner -->
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-file-shield text-primary"></i> ISO 9001:2015 Traceability & Audit Vault
+        </div>
+        <p class="page-explainer-desc">
+          Immutable quality records vault. Stores cryptographic SHA-256 image hashes, component metrology measurements, and operator timestamps for every inspected board. Enables 1-click CSV/JSON export and printable audit reports for regulatory compliance.
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-fingerprint"></i> SHA-256 Cryptographic Hashes</span>
+        <span class="explainer-chip"><i class="fa-solid fa-file-export"></i> 1-Click Export & Print</span>
+        <span class="explainer-chip"><i class="fa-solid fa-shield-halved"></i> Tamper-Proof Audit Trail</span>
+      </div>
+    </div>
+
+    <section class="audit-log-card">
+      <div class="audit-header">
+        <div class="audit-title-group">
+          <h2><i class="fa-solid fa-file-shield text-emerald"></i> ISO 9001:2015 Traceability & Audit Vault</h2>
+          <span class="audit-subtag">Tamper-proof immutable records, cryptographic SHA-256 hashes, and quality history</span>
+        </div>
+        <div class="export-btn-group">
+          <button id="btnExportCSV" class="btn-export"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+          <button id="btnExportJSON" class="btn-export"><i class="fa-solid fa-file-code"></i> Export JSON</button>
+          <button id="btnPrintPDF" class="btn-export"><i class="fa-solid fa-print"></i> Print Report</button>
+          <button id="btnRefreshLogs" class="btn-export"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+      </div>
+
+      <div class="table-responsive-wrapper">
+        <table class="ind-table audit-table">
+          <thead>
+            <tr>
+              <th>Record ID</th>
+              <th>Timestamp (UTC)</th>
+              <th>Board Serial</th>
+              <th>SHA-256 Image Hash</th>
+              <th>Alignment</th>
+              <th>Health Index</th>
+              <th>Disposition</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Raw Record Modal -->
+  <div id="auditModal" class="webcam-modal-backdrop" style="display: none;">
+    <div class="webcam-modal-content" style="max-width: 700px;">
+      <div class="webcam-modal-header">
+        <h3><i class="fa-solid fa-code"></i> ISO 9001 Audit Record Detail</h3>
+        <button id="btnCloseAuditModal" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="background: #090D16; padding: 18px; max-height: 400px; overflow-y: auto;">
+        <pre id="auditJsonDisplay" style="color: #34D399; font-family: 'JetBrains Mono', monospace; font-size: 13px; white-space: pre-wrap; margin: 0;"></pre>
+      </div>
+      <div class="webcam-modal-footer">
+        <button id="btnCopyAuditJson" class="ind-btn btn-secondary"><i class="fa-solid fa-copy"></i> Copy JSON</button>
+        <button id="btnCloseAuditModalFooter" class="ind-btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology & AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links"><span>IPC-A-610H Class 2/3</span> &bull; <span>IPC-CFX-2591</span> &bull; <span>ISO 9001:2015</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tbody = document.getElementById('auditTableBody');
+      const btnRefresh = document.getElementById('btnRefreshLogs');
+      const btnCSV = document.getElementById('btnExportCSV');
+      const btnJSON = document.getElementById('btnExportJSON');
+      const btnPrint = document.getElementById('btnPrintPDF');
+      const auditModal = document.getElementById('auditModal');
+      const auditJsonDisplay = document.getElementById('auditJsonDisplay');
+      let logsData = [];
+
+      async function loadLogs() {
+        try {
+          logsData = await fetch('/audit/logs').then(r => r.json());
+          if (logsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="color: #94A3B8; padding: 25px;">No audit records found in vault.</td></tr>`;
+            return;
+          }
+          tbody.innerHTML = logsData.map((l, idx) => `
+            <tr>
+              <td><code>${l.record_id || 'N/A'}</code></td>
+              <td><span style="color: #CBD5E1;">${l.timestamp_utc ? new Date(l.timestamp_utc).toLocaleString() : 'N/A'}</span></td>
+              <td><strong style="color: #FFFFFF;">${l.board_serial || 'AUTO-SERIAL'}</strong></td>
+              <td><code>${(l.image_sha256 || '').substring(0, 16)}...</code></td>
+              <td><span style="color: #34D399; font-weight: 700;">${((l.alignment_quality || 1.0) * 100).toFixed(1)}%</span></td>
+              <td><strong style="color: #FFFFFF;">${(l.health_index || 1.0).toFixed(3)}</strong></td>
+              <td><span class="tag-badge ${l.verdict === 'PASS' ? 'tag-pass' : l.verdict === 'REWORK' ? 'tag-rework' : 'tag-fail'}">${l.verdict}</span></td>
+              <td><button class="btn-export" onclick="showRaw(${idx})"><i class="fa-solid fa-code"></i> View Raw</button></td>
+            </tr>
+          `).join('');
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="color: #EF4444; padding: 25px;">Error loading audit logs: ${e.message}</td></tr>`;
+        }
+      }
+
+      window.showRaw = function(idx) {
+        if (!logsData[idx]) return;
+        auditJsonDisplay.textContent = JSON.stringify(logsData[idx], null, 2);
+        auditModal.style.display = 'flex';
+      };
+
+      document.getElementById('btnCloseAuditModal').addEventListener('click', () => auditModal.style.display = 'none');
+      document.getElementById('btnCloseAuditModalFooter').addEventListener('click', () => auditModal.style.display = 'none');
+      document.getElementById('btnCopyAuditJson').addEventListener('click', () => {
+        navigator.clipboard.writeText(auditJsonDisplay.textContent);
+        alert("Copied raw audit JSON to clipboard!");
+      });
+
+      btnCSV.addEventListener('click', () => {
+        if (!logsData.length) return alert("No logs to export.");
+        const keys = Object.keys(logsData[0]);
+        const csv = "data:text/csv;charset=utf-8," + keys.join(",") + "\n" + logsData.map(r => keys.map(k => JSON.stringify(r[k] || "")).join(",")).join("\n");
+        const a = document.createElement("a");
+        a.href = encodeURI(csv);
+        a.download = `iso_9001_audit_${Date.now()}.csv`;
+        a.click();
+      });
+
+      btnJSON.addEventListener('click', () => {
+        if (!logsData.length) return alert("No logs to export.");
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logsData, null, 2));
+        const a = document.createElement("a");
+        a.href = dataStr;
+        a.download = `iso_9001_audit_${Date.now()}.json`;
+        a.click();
+      });
+
+      btnPrint.addEventListener('click', () => window.print());
+      btnRefresh.addEventListener('click', loadLogs);
+      loadLogs();
+    });
+  </script>
+</body>
+</html>

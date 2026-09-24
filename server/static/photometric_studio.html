@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photometric 3D AOI & Solder Metrology Studio — Enterprise</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    .studio-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .studio-viewport-card {
+      background: #060913;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      position: relative;
+    }
+    .studio-viewport-header {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+      z-index: 10;
+    }
+    .studio-view-modes {
+      display: flex;
+      gap: 6px;
+    }
+    .mode-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-mono, monospace);
+      transition: all 0.2s;
+    }
+    .mode-btn.active, .mode-btn:hover {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+    }
+    .studio-canvas-container {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #0f172a 0%, #060913 100%);
+    }
+    #studio-webgl-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    .studio-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .studio-card {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .studio-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .profile-chart-box {
+      background: #060913;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px;
+      height: 160px;
+      position: relative;
+    }
+    .kpi-row-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .studio-kpi {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+    .studio-kpi-lbl {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .studio-kpi-val {
+      font-size: 16px;
+      font-weight: 800;
+      font-family: var(--font-mono, monospace);
+      color: #38bdf8;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology & AOI Station</div>
+          <div class="brand-sub">Photometric 3D AOI & Solder Metrology Studio</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-cube"></i> 3D Micro-Topography</span>
+        <span class="pill pill-version"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610H 3D Wetting</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">METROLOGY STUDIO</span>
+          <span class="telem-val text-pass">POISSON 3D SOLVER ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Multi-Page Navigation Menu -->
+    <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn active"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main style="padding: 16px 24px; max-width: 1440px; margin: 0 auto;">
+    
+    <!-- Top Control Bar -->
+    <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; padding: 12px 18px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <label style="font-size: 13px; font-weight: 700; color: #f8fafc;"><i class="fa-solid fa-crosshairs text-cyan"></i> Target Component / Joint:</label>
+        <select id="studio-component-select" class="ind-select" style="padding: 6px 14px; background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; border-radius: 6px; font-weight: 600;" onchange="loadStudioComponent(this.value)">
+          <option value="U1_PIN1" selected>U1 (QFP-32) — Pin 1 Solder Fillet (Optimal Class 3)</option>
+          <option value="U2_PIN4">U2 (SOIC-8) — Pin 4 Solder Bridge Short (Defect)</option>
+          <option value="C1_PAD_L">C1 (0805) — Left Pad Tombstone Tilt 45° (Defect)</option>
+          <option value="R1_PAD_R">R1 (0805) — Right Pad Insufficient Wetting (Rework)</option>
+          <option value="D1_ANODE">D1 (SMA) — Anode Solder Fillet (Class 3 Target)</option>
+          <option value="BURN_HOLE">TB032 — Substrate Thermal Burn Hole & Carbonized FR-4 Rupture (DEFECT)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="exportWavefrontOBJ()"><i class="fa-solid fa-file-export"></i> Export 3D Mesh (.OBJ)</button>
+        <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="resetCameraView()"><i class="fa-solid fa-arrows-rotate"></i> Reset 3D View</button>
+      </div>
+    </div>
+
+    <!-- Main Studio Layout -->
+    <div class="studio-layout">
+      
+      <!-- 3D WebGL Workstation Viewport -->
+      <div class="studio-viewport-card">
+        <div class="studio-viewport-header">
+          <span style="font-size: 12px; font-family: var(--font-mono, monospace); color: #38bdf8;"><i class="fa-solid fa-cube"></i> THREE.JS 3D POISSON SURFACE RECONSTRUCTION</span>
+          <div class="studio-view-modes">
+            <button class="mode-btn active" onclick="setRenderMode('shaded', this)">Solid Shaded</button>
+            <button class="mode-btn" onclick="setRenderMode('wireframe', this)">3D Wireframe</button>
+            <button class="mode-btn" onclick="setRenderMode('normals', this)">Normal Vectors</button>
+            <button class="mode-btn" onclick="setRenderMode('heightmap', this)">Height Map</button>
+          </div>
+        </div>
+
+        <div class="studio-canvas-container" id="studio-canvas-parent">
+          <canvas id="studio-webgl-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Right Metrology & Cross-Section Sidebar -->
+      <div class="studio-sidebar">
+        
+        <!-- Cross-Sectional 2D Profile Curve -->
+        <div class="studio-card">
+          <div class="studio-card-title">
+            <span><i class="fa-solid fa-chart-area text-cyan"></i> Solder Meniscus 2D Slice Z(x)</span>
+            <span id="slice-pos-label" style="color: #38bdf8; font-family: var(--font-mono, monospace);">Y = 50%</span>
+          </div>
+
+          <div class="profile-chart-box" id="profile-svg-container">
+            <svg id="profile-svg" width="100%" height="100%" viewBox="0 0 380 140">
+              <!-- Grid & Labels rendered dynamically -->
+            </svg>
+          </div>
+
+          <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 11px; color: #94a3b8; font-weight: 600;">Slice Line:</label>
+            <input type="range" id="slice-slider" min="0" max="100" value="50" style="flex: 1;" oninput="updateSliceProfile(this.value)">
+          </div>
+        </div>
+
+        <!-- 3D Solder Metrology KPIs -->
+        <div class="studio-card">
+          <div class="studio-card-title">
+            <span><i class="fa-solid fa-ruler-combined text-cyan"></i> 3D Solder Volume & Angles</span>
+            <span id="studio-ipc-badge" class="badge" style="background: #10b981; color: #fff; padding: 2px 8px; font-size: 10px;">CLASS 3 PASS</span>
+          </div>
+
+          <div class="kpi-row-grid">
+            <div class="studio-kpi">
+              <div class="studio-kpi-lbl">SOLDER VOLUME (V)</div>
+              <div id="studio-kpi-vol" class="studio-kpi-val">12.45 nL</div>
+            </div>
+            <div class="studio-kpi">
+              <div class="studio-kpi-lbl">PEAK ELEVATION (Zmax)</div>
+              <div id="studio-kpi-zmax" class="studio-kpi-val">138.2 µm</div>
+            </div>
+            <div class="studio-kpi">
+              <div class="studio-kpi-lbl">TOE WETTING ANGLE (θtoe)</div>
+              <div id="studio-kpi-toe" class="studio-kpi-val">28.5°</div>
+            </div>
+            <div class="studio-kpi">
+              <div class="studio-kpi-lbl">HEEL WETTING ANGLE (θheel)</div>
+              <div id="studio-kpi-heel" class="studio-kpi-val">34.1°</div>
+            </div>
+            <div class="studio-kpi">
+              <div class="studio-kpi-lbl">LEAD COPLANARITY (ΔZ)</div>
+              <div id="studio-kpi-coplanar" class="studio-kpi-val" style="color: #34d399;">18.4 µm</div>
+            </div>
+            <div class="studio-kpi">
+              <div class="studio-kpi-lbl">PAD COVERAGE (A%)</div>
+              <div id="studio-kpi-cov" class="studio-kpi-val">96.8%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Reflection Suppression (MRS) Indicator -->
+        <div class="studio-card" style="font-size: 11px; color: #94a3b8; line-height: 1.5;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: #38bdf8; font-weight: 700;">
+            <i class="fa-solid fa-shield-halved"></i> MRS Specular Glare Suppression Active
+          </div>
+          Dichromatic reflection separation removes SAC300 shiny mirror glare, ensuring exact mathematical 3D height without distortion.
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <script src="/static/common.js"></script>
+  <script>
+    let studioScene, studioCamera, studioRenderer, studioControls, studioMesh;
+    let currentRenderMode = "shaded";
+    let currentComponent = "U1_PIN1";
+
+    function initStudio3D() {
+      const container = document.getElementById("studio-canvas-parent");
+      const canvas = document.getElementById("studio-webgl-canvas");
+
+      studioScene = new THREE.Scene();
+      studioScene.background = new THREE.Color(0x060913);
+
+      studioCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      studioCamera.position.set(0, 50, 70);
+
+      studioRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      studioRenderer.setSize(container.clientWidth, container.clientHeight);
+
+      if (typeof THREE.OrbitControls !== "undefined") {
+        studioControls = new THREE.OrbitControls(studioCamera, studioRenderer.domElement);
+        studioControls.enableDamping = true;
+        studioControls.dampingFactor = 0.05;
+      }
+
+      // Lighting
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+      studioScene.add(ambLight);
+
+      const dir1 = new THREE.DirectionalLight(0x38bdf8, 1.0);
+      dir1.position.set(40, 80, 40);
+      studioScene.add(dir1);
+
+      const dir2 = new THREE.DirectionalLight(0xa855f7, 0.6);
+      dir2.position.set(-40, 30, -30);
+      studioScene.add(dir2);
+
+      // Grid Floor
+      const grid = new THREE.GridHelper(80, 20, 0x334155, 0x1e293b);
+      grid.position.y = -0.1;
+      studioScene.add(grid);
+
+      rebuildStudioMesh("U1_PIN1");
+
+      function animate() {
+        requestAnimationFrame(animate);
+        if (studioControls) studioControls.update();
+        studioRenderer.render(studioScene, studioCamera);
+      }
+      animate();
+    }
+
+    function rebuildStudioMesh(compKey) {
+      if (studioMesh) studioScene.remove(studioMesh);
+
+      const w = 48, d = 48, segs = 40;
+      const geo = new THREE.PlaneGeometry(w, d, segs, segs);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const r = Math.sqrt(x*x + y*y);
+
+        let z = 0;
+        if (compKey === "U1_PIN1" || compKey === "D1_ANODE") {
+          // Ideal concave fillet
+          z = Math.max(0, 14.0 * (1.0 - Math.pow(r / 24.0, 1.6)));
+        } else if (compKey === "U2_PIN4") {
+          // Solder bridge short across adjacent pins
+          z = Math.max(0, 22.0 * Math.cos((x / 24.0) * (Math.PI / 2)));
+        } else if (compKey === "C1_PAD_L") {
+          // 45-degree tombstone lift
+          z = Math.max(0, (x + 24.0) * 0.65);
+        } else if (compKey === "R1_PAD_R") {
+          // Flat dry pad
+          z = Math.max(0, 2.0 * (1.0 - r / 24.0));
+        } else if (compKey === "BURN_HOLE") {
+          // Catastrophic thermal burn hole crater
+          if (r < 10.0) {
+            z = -14.0;
+          } else if (r < 22.0) {
+            z = -8.0 + Math.sin((r - 10.0) / 12.0 * Math.PI) * 4.0;
+          } else {
+            z = 0;
+          }
+        }
+        pos.setZ(i, z);
+      }
+
+      geo.computeVertexNormals();
+
+      let mat;
+      const isDefect = compKey === "U2_PIN4" || compKey === "C1_PAD_L" || compKey === "R1_PAD_R" || compKey === "BURN_HOLE";
+
+      if (currentRenderMode === "wireframe") {
+        mat = new THREE.MeshBasicMaterial({ color: isDefect ? 0xef4444 : 0x38bdf8, wireframe: true });
+      } else if (currentRenderMode === "normals") {
+        mat = new THREE.MeshNormalMaterial();
+      } else if (currentRenderMode === "heightmap") {
+        mat = new THREE.MeshStandardMaterial({ color: isDefect ? 0xf59e0b : 0x06b6d4, roughness: 0.3, metalness: 0.5 });
+      } else {
+        // Solid Shaded SAC300 Solder alloy
+        mat = new THREE.MeshStandardMaterial({
+          color: compKey === "BURN_HOLE" ? 0x1c1917 : (isDefect ? 0xef4444 : 0xcfd8dc),
+          metalness: compKey === "BURN_HOLE" ? 0.2 : 0.9,
+          roughness: compKey === "BURN_HOLE" ? 0.9 : 0.15
+        });
+      }
+
+      studioMesh = new THREE.Mesh(geo, mat);
+      studioMesh.rotation.x = -Math.PI / 2.3;
+      studioScene.add(studioMesh);
+    }
+
+    function setRenderMode(mode, btn) {
+      currentRenderMode = mode;
+      document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      rebuildStudioMesh(currentComponent);
+    }
+
+    function resetCameraView() {
+      if (studioControls) studioControls.reset();
+      studioCamera.position.set(0, 50, 70);
+    }
+
+    async function loadStudioComponent(compKey) {
+      currentComponent = compKey;
+      rebuildStudioMesh(compKey);
+      await updateSliceProfile(document.getElementById("slice-slider").value);
+    }
+
+    async function updateSliceProfile(sliceVal) {
+      document.getElementById("slice-pos-label").textContent = `Y = ${sliceVal}%`;
+      try {
+        const res = await fetch(`/api/studio/profile?comp_id=${currentComponent}&slice_pct=${sliceVal}`);
+        const data = await res.json();
+        
+        renderProfileSVG(data);
+
+        // Update KPIs
+        document.getElementById("studio-kpi-vol").textContent = `${data.volume_nl.toFixed(2)} nL`;
+        document.getElementById("studio-kpi-zmax").textContent = `${data.peak_height_um.toFixed(1)} µm`;
+        document.getElementById("studio-kpi-toe").textContent = `${data.toe_wetting_angle_deg.toFixed(1)}°`;
+        document.getElementById("studio-kpi-heel").textContent = `${data.heel_wetting_angle_deg.toFixed(1)}°`;
+        document.getElementById("studio-kpi-coplanar").textContent = `${data.coplanarity_delta_um.toFixed(1)} µm`;
+        document.getElementById("studio-kpi-cov").textContent = `${data.wetted_coverage_pct.toFixed(1)}%`;
+
+        const badge = document.getElementById("studio-ipc-badge");
+        if (data.is_within_tolerance && data.coplanarity_delta_um <= 50.0) {
+          badge.textContent = "CLASS 3 PASS";
+          badge.style.background = "#10b981";
+        } else {
+          badge.textContent = "DEFECT VIOLATION";
+          badge.style.background = "#ef4444";
+        }
+      } catch (err) {
+        console.error("Profile update failed:", err);
+      }
+    }
+
+    function renderProfileSVG(data) {
+      const svg = document.getElementById("profile-svg");
+      const zMeasured = data.z_measured_um || [];
+      const zIdeal = data.z_ideal_um || [];
+      const zUpper = data.z_upper_tol_um || [];
+      const zLower = data.z_lower_tol_um || [];
+
+      const w = 380, h = 140, pad = 20;
+      const maxZ = 160.0;
+
+      function toPoints(arr) {
+        return arr.map((z, idx) => {
+          const x = pad + (idx / (arr.length - 1)) * (w - 2 * pad);
+          const y = h - pad - (z / maxZ) * (h - 2 * pad);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(" ");
+      }
+
+      const measPts = toPoints(zMeasured);
+      const idealPts = toPoints(zIdeal);
+      const upperPts = toPoints(zUpper);
+      const lowerPts = toPoints(zLower);
+
+      svg.innerHTML = `
+        <!-- Axes -->
+        <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="#334155" stroke-width="1.5" />
+        <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h - pad}" stroke="#334155" stroke-width="1.5" />
+        
+        <!-- Tolerance Zone Upper & Lower -->
+        <polyline points="${upperPts}" fill="none" stroke="#f59e0b" stroke-dasharray="3,3" stroke-width="1" />
+        <polyline points="${lowerPts}" fill="none" stroke="#f59e0b" stroke-dasharray="3,3" stroke-width="1" />
+        
+        <!-- Ideal Concave Target -->
+        <polyline points="${idealPts}" fill="none" stroke="#38bdf8" stroke-dasharray="4,4" stroke-width="1.5" />
+        
+        <!-- Measured Physical Height Curve -->
+        <polyline points="${measPts}" fill="none" stroke="${data.is_within_tolerance ? '#34d399' : '#ef4444'}" stroke-width="2.5" />
+
+        <!-- Labels -->
+        <text x="${pad + 6}" y="${pad + 10}" fill="#94a3b8" font-size="9" font-family="monospace">160 µm</text>
+        <text x="${pad + 6}" y="${h - pad - 4}" fill="#94a3b8" font-size="9" font-family="monospace">0 µm</text>
+        <text x="${w - 110}" y="${pad + 10}" fill="#38bdf8" font-size="9" font-family="monospace">--- Ideal Meniscus</text>
+        <text x="${w - 110}" y="${pad + 22}" fill="${data.is_within_tolerance ? '#34d399' : '#ef4444'}" font-size="9" font-family="monospace">― Measured Z(x)</text>
+      `;
+    }
+
+    function exportWavefrontOBJ() {
+      window.open(`/api/studio/export-obj?comp_id=${currentComponent}`, "_blank");
+    }
+
+    function syncActivePhotometricBoard(boardInfo) {
+      if (!boardInfo) return;
+      const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005');
+      const select = document.getElementById("studio-component-select");
+      
+      if (bId === "TB032" || bId.toLowerCase().includes("burn")) {
+        if (select) select.value = "BURN_HOLE";
+        loadStudioComponent("BURN_HOLE");
+      } else if (bId === "TB002" || bId === "TB023" || bId === "TB024") {
+        if (select) select.value = "C1_PAD_L";
+        loadStudioComponent("C1_PAD_L");
+      } else if (bId === "TB021" || bId === "TB022") {
+        if (select) select.value = "U2_PIN4";
+        loadStudioComponent("U2_PIN4");
+      } else if (bId === "TB012" || bId === "TB025") {
+        if (select) select.value = "R1_PAD_R";
+        loadStudioComponent("R1_PAD_R");
+      } else if (boardInfo.verdict === "PASS") {
+        if (select) select.value = "U1_PIN1";
+        loadStudioComponent("U1_PIN1");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initStudio3D();
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(active => {
+          if (active && (active.board_id || active.serial)) {
+            syncActivePhotometricBoard(active);
+          } else {
+            loadStudioComponent("U1_PIN1");
+          }
+        });
+      } else {
+        loadStudioComponent("U1_PIN1");
+      }
+
+      if (typeof onGlobalActiveBoardChange === 'function') {
+        onGlobalActiveBoardChange(syncActivePhotometricBoard);
+      }
+    });
+  </script>
+</body>
+</html>
