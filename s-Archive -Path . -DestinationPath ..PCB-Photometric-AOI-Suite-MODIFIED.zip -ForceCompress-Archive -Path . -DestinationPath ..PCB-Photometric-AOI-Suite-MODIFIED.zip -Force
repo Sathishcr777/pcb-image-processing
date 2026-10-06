@@ -1,0 +1,6 @@
+warning: in the working copy of 'scripts/generate_synthetic_boards.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/run_system_tests.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/test_metrology_boards.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/pipeline/detector_2d.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/pipeline/detector_depth.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/pipeline/metrology_engine.py', LF will be replaced by CRLF the next time Git touches it

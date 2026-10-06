@@ -52,6 +52,7 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn active"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
@@ -70,6 +71,18 @@
         <span class="explainer-chip"><i class="fa-solid fa-fingerprint"></i> SHA-256 Cryptographic Hashes</span>
         <span class="explainer-chip"><i class="fa-solid fa-file-export"></i> 1-Click Export & Print</span>
         <span class="explainer-chip"><i class="fa-solid fa-shield-halved"></i> Tamper-Proof Audit Trail</span>
+      </div>
+    <!-- Active Board Context Card -->
+    <div id="auditActiveCard" style="background: rgba(15, 23, 42, 0.85); border: 1px solid #1E293B; border-left: 4px solid #38BDF8; padding: 14px 20px; border-radius: 10px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-file-shield text-cyan"></i> CURRENT ACTIVE BOARD IN AUDIT SCOPE:</div>
+        <div style="font-size: 16px; font-weight: 800; color: #F8FAFC; margin-top: 2px;" id="auditBoardName">TB005 — 100% Perfect Golden Master</div>
+        <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;" id="auditScopeNotice">Traceability Status: All inspection records, bounding boxes, and SHA-256 hashes for this board are archived in the tamper-proof vault.</div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span id="auditVerdictBadge" class="tag-badge tag-pass" style="font-size: 12px; padding: 6px 14px; font-weight: 800;">
+          <i class="fa-solid fa-fingerprint"></i> SHA-256 VERIFIED
+        </span>
       </div>
     </div>
 
@@ -199,9 +212,43 @@
         a.click();
       });
 
+      function syncAuditActiveBoard(active) {
+        if (!active) return;
+        const bId = active.board_id || active.serial || 'TB005';
+        const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[bId]) || {};
+        const bName = meta.name ? `${bId} — ${meta.name}` : `${bId} — Active Record`;
+
+        const nameEl = document.getElementById('auditBoardName');
+        const badgeEl = document.getElementById('auditVerdictBadge');
+        const cardEl = document.getElementById('auditActiveCard');
+
+        if (nameEl) nameEl.textContent = bName;
+
+        const isBurn = bId === 'TB032' || (meta.defect_type && meta.defect_type.toLowerCase().includes('burn'));
+        const isPass = active.verdict === 'PASS';
+
+        if (isBurn) {
+          if (badgeEl) { badgeEl.className = 'tag-badge tag-fail'; badgeEl.innerHTML = '<i class="fa-solid fa-ban"></i> DISPOSITION: SCRAP (NON-CONFORMING)'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#EF4444';
+        } else if (isPass) {
+          if (badgeEl) { badgeEl.className = 'tag-badge tag-pass'; badgeEl.innerHTML = '<i class="fa-solid fa-check"></i> DISPOSITION: RELEASED (CONFORMING)'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#10B981';
+        } else {
+          if (badgeEl) { badgeEl.className = 'tag-badge tag-fail'; badgeEl.innerHTML = '<i class="fa-solid fa-wrench"></i> DISPOSITION: REWORK HOLD'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#EF4444';
+        }
+      }
+
       btnPrint.addEventListener('click', () => window.print());
       btnRefresh.addEventListener('click', loadLogs);
       loadLogs();
+
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(syncAuditActiveBoard);
+      }
+      if (typeof onGlobalActiveBoardChange === 'function') {
+        onGlobalActiveBoardChange(syncAuditActiveBoard);
+      }
     });
   </script>
 </body>

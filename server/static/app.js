@@ -162,10 +162,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let scenarioRequestId = 0;
 
-  // --- 4. Auto-Run Scenario Dropdown ---
+  // --- 4. Auto-Run Scenario Dropdown & Global Active Board Integration ---
   if (boardSelect) {
-    boardSelect.addEventListener('change', (e) => {
-      autoRunScenario(e.target.value);
+    boardSelect.addEventListener('change', async (e) => {
+      const bId = e.target.value;
+      try {
+        const resp = await fetch(`/api/active-board?board=${encodeURIComponent(bId)}`);
+        if (resp.ok) {
+          const boardData = await resp.json();
+          if (typeof setGlobalActiveBoard === 'function') {
+            await setGlobalActiveBoard(boardData);
+          }
+        } else {
+          if (typeof setGlobalActiveBoard === 'function') {
+            await setGlobalActiveBoard({
+              board_id: bId,
+              serial: bId,
+              image_url: `/evaluation/test_boards/${bId}.png`
+            });
+          }
+        }
+      } catch (err) {
+        if (typeof setGlobalActiveBoard === 'function') {
+          await setGlobalActiveBoard({
+            board_id: bId,
+            serial: bId,
+            image_url: `/evaluation/test_boards/${bId}.png`
+          });
+        }
+      }
+      if (typeof updateNavLinksWithActiveBoard === 'function') {
+        updateNavLinksWithActiveBoard(bId);
+      }
+      autoRunScenario(bId);
+    });
+  }
+
+  // Restore and maintain Global Active Board state on startup
+  if (typeof getGlobalActiveBoard === 'function') {
+    getGlobalActiveBoard().then(active => {
+      if (active && (active.board_id || active.serial)) {
+        const bId = active.board_id || active.serial;
+        if (boardSelect) {
+          if (typeof syncDropdownToActiveBoard === 'function') {
+            syncDropdownToActiveBoard(boardSelect, bId);
+          } else {
+            boardSelect.value = bId;
+          }
+        }
+        if (active.overlay_b64 || active.image_b64) {
+          currentInspectionData = {
+            verdict: active.verdict || "PASS",
+            health_index: active.health_index ?? (active.verdict === 'PASS' ? 1.0 : 0.85),
+            defective_components: active.defective_components ?? 0,
+            overlay_image_b64: active.overlay_b64 || active.image_b64,
+            depth_heatmap_b64: active.depth_heatmap_b64,
+            per_component_results: active.components || [],
+            metrology: active.metrology || []
+          };
+          renderDashboard(currentInspectionData, bId);
+          if (imgTestInput) imgTestInput.src = active.image_url || `/evaluation/test_boards/${bId}.png`;
+        } else {
+          autoRunScenario(bId);
+        }
+      }
+    });
+  }
+
+  if (typeof onGlobalActiveBoardChange === 'function') {
+    onGlobalActiveBoardChange((active) => {
+      if (!active) return;
+      const bId = active.board_id || active.serial;
+      if (boardSelect && boardSelect.value !== bId) {
+        if (typeof syncDropdownToActiveBoard === 'function') {
+          syncDropdownToActiveBoard(boardSelect, bId);
+        } else {
+          boardSelect.value = bId;
+        }
+        autoRunScenario(bId);
+      }
     });
   }
 
@@ -198,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
+
 
   // --- 5. CAD Centroid Ingestion Modals ---
   [btnOpenCADModal, btnOpenCADModal2].forEach(btn => {
@@ -280,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       modalWebcamCanvas.toBlob((blob) => {
         const file = new File([blob], "live_camera_capture.png", { type: "image/png" });
+        lastUploadedFile = file;
         imgTestInput.src = modalWebcamCanvas.toDataURL('image/png');
         stopWebcamStream();
         runInspection(file, "LIVE-CAM-" + Date.now().toString().slice(-4));
@@ -454,20 +531,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Synchronize active board to all suite pages (360 3D, Photometrics, X-Ray, Metrology)
       if (typeof setGlobalActiveBoard === 'function') {
-        const imgUrl = lastUploadedFile ? imgTestInput.src : `/evaluation/test_boards/${serialName}.png`;
+        const isCustomOrLive = lastUploadedFile || !serialName.startsWith("TB");
+        const imgUrl = (isCustomOrLive && imgTestInput && imgTestInput.src && imgTestInput.src.length > 50)
+          ? imgTestInput.src
+          : `/evaluation/test_boards/${serialName}.png`;
         setGlobalActiveBoard({
           board_id: serialName,
           serial: serialName,
           verdict: currentInspectionData.verdict,
+          health_index: currentInspectionData.health_index,
           defective_components: currentInspectionData.defective_components,
           image_url: imgUrl,
-          image_b64: currentInspectionData.overlay_image_b64,
-          overlay_b64: currentInspectionData.overlay_image_b64,
-          depth_heatmap_b64: currentInspectionData.depth_heatmap_b64,
           components: currentInspectionData.per_component_results,
           metrology: currentInspectionData.metrology,
+          golden_comparison: currentInspectionData.golden_comparison || null,
           timestamp: Date.now()
         });
+
+        // Maintain local session audit cache for seamless offline and cross-page persistence
+        try {
+          const cacheStr = sessionStorage.getItem('aoi_session_audit_cache');
+          const cache = cacheStr ? JSON.parse(cacheStr) : [];
+          const recId = currentInspectionData.record_id || `REC-${serialName}-${Date.now()}`;
+          const catalog = (typeof getScenarioCatalogEntry === 'function') ? getScenarioCatalogEntry(serialName) : {};
+          cache.push({
+            id: recId,
+            record_id: recId,
+            board_id: serialName,
+            serial: serialName,
+            scenario_name: catalog.name || serialName,
+            defect_type: catalog.defect_type || 'none',
+            defect_description: catalog.defect_desc || '',
+            verdict: currentInspectionData.verdict,
+            health_index: currentInspectionData.health_index,
+            total_components: currentInspectionData.total_components || 12,
+            defective_components: currentInspectionData.defective_components,
+            image_url: imgUrl,
+            overlay_image_b64: currentInspectionData.overlay_image_b64,
+            components: currentInspectionData.per_component_results,
+            metrology: currentInspectionData.metrology,
+            golden_comparison: currentInspectionData.golden_comparison || null,
+            processing_time_ms: currentInspectionData.processing_time_ms,
+            alignment_quality: currentInspectionData.alignment_quality,
+            timestamp: new Date().toISOString()
+          });
+          sessionStorage.setItem('aoi_session_audit_cache', JSON.stringify(cache));
+        } catch (e) {}
       }
     } catch (e) {
       if (reqId === null || reqId === scenarioRequestId) {
@@ -540,20 +649,9 @@ document.addEventListener('DOMContentLoaded', () => {
     rawComponentsData = data.per_component_results || [];
     rawMetrologyData = data.metrology || [];
 
-    // Persist active inspection data for 3D Digital Twin Viewer
     try {
-      localStorage.setItem('activeBoard3D', JSON.stringify({
-        serial: serial,
-        verdict: verdict,
-        health_index: hi,
-        image_b64: data.overlay_image_b64,
-        heatmap_b64: data.depth_heatmap_b64,
-        components: rawComponentsData,
-        metrology: rawMetrologyData
-      }));
-    } catch (e) {
-      console.warn("Storage quota:", e);
-    }
+      localStorage.removeItem('activeBoard3D');
+    } catch (e) {}
 
     // Max Overhang & Skew
     let maxOverhang = 0.0;

@@ -166,11 +166,37 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
   <main style="padding: 16px 24px; max-width: 1440px; margin: 0 auto;">
     
+    <!-- Active Board Context Bar -->
+    <div id="studio-context-banner" style="background: rgba(15, 23, 42, 0.85); border: 1px solid #1e293b; padding: 10px 18px; border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;"><i class="fa-solid fa-microchip text-cyan"></i> ACTIVE BOARD:</span>
+        <strong id="studio-active-board-label" style="color: #38bdf8; font-size: 13px;">TB005 — 100% Perfect Golden Master</strong>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 11px; color: #94a3b8; font-weight: 700;">MODULE PURPOSE:</span>
+        <span class="tag-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #0284c7; font-size: 11px;">
+          <i class="fa-solid fa-ruler-combined"></i> COMPONENT & SOLDER-LEVEL 3D METROLOGY
+        </span>
+      </div>
+    </div>
+
+    <!-- Applicability Warning Banner (Shown when non-solder target like TB032 is active) -->
+    <div id="applicability-alert-card" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px; color: #f87171; font-weight: 800; font-size: 13px;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>3D SOLDER MENISCUS METROLOGY NOT APPLICABLE TO THIS INSPECTION TARGET</span>
+      </div>
+      <p style="margin: 6px 0 0; font-size: 12px; color: #fca5a5; line-height: 1.5;">
+        The currently active inspection target is a <strong>Substrate Thermal Burn Hole & Carbonized FR-4 Rupture</strong>. Solder fillet meniscus curves, SAC300 wetting angles, and solder volume calculations are physically non-applicable to substrate burnouts. Displaying physical substrate crater topography & dielectric destruction metrics.
+      </p>
+    </div>
+
     <!-- Top Control Bar -->
     <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; padding: 12px 18px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div style="display: flex; align-items: center; gap: 12px;">
@@ -321,7 +347,7 @@
       grid.position.y = -0.1;
       studioScene.add(grid);
 
-      rebuildStudioMesh("U1_PIN1");
+      // Scene initial setup complete - awaiting active board synchronization
 
       function animate() {
         requestAnimationFrame(animate);
@@ -412,29 +438,50 @@
       await updateSliceProfile(document.getElementById("slice-slider").value);
     }
 
+    let currentActiveBoardId = "TB005";
+
     async function updateSliceProfile(sliceVal) {
       document.getElementById("slice-pos-label").textContent = `Y = ${sliceVal}%`;
       try {
-        const res = await fetch(`/api/studio/profile?comp_id=${currentComponent}&slice_pct=${sliceVal}`);
+        const res = await fetch(`/api/studio/profile?comp_id=${currentComponent}&slice_pct=${sliceVal}&board_id=${currentActiveBoardId}`);
         const data = await res.json();
         
         renderProfileSVG(data);
 
-        // Update KPIs
-        document.getElementById("studio-kpi-vol").textContent = `${data.volume_nl.toFixed(2)} nL`;
-        document.getElementById("studio-kpi-zmax").textContent = `${data.peak_height_um.toFixed(1)} µm`;
-        document.getElementById("studio-kpi-toe").textContent = `${data.toe_wetting_angle_deg.toFixed(1)}°`;
-        document.getElementById("studio-kpi-heel").textContent = `${data.heel_wetting_angle_deg.toFixed(1)}°`;
-        document.getElementById("studio-kpi-coplanar").textContent = `${data.coplanarity_delta_um.toFixed(1)} µm`;
-        document.getElementById("studio-kpi-cov").textContent = `${data.wetted_coverage_pct.toFixed(1)}%`;
-
+        const alertCard = document.getElementById("applicability-alert-card");
         const badge = document.getElementById("studio-ipc-badge");
-        if (data.is_within_tolerance && data.coplanarity_delta_um <= 50.0) {
-          badge.textContent = "CLASS 3 PASS";
-          badge.style.background = "#10b981";
-        } else {
-          badge.textContent = "DEFECT VIOLATION";
+
+        if (data.is_solder_applicable === false) {
+          if (alertCard) alertCard.style.display = "block";
+
+          // Clear inapplicable solder joint KPIs with professional industrial state
+          document.getElementById("studio-kpi-vol").textContent = "N/A (Burn)";
+          document.getElementById("studio-kpi-zmax").textContent = "-14.0 mm (Crater)";
+          document.getElementById("studio-kpi-toe").textContent = "N/A";
+          document.getElementById("studio-kpi-heel").textContent = "N/A";
+          document.getElementById("studio-kpi-coplanar").textContent = "N/A";
+          document.getElementById("studio-kpi-cov").textContent = "0.0% (Rupture)";
+
+          badge.textContent = "SUBSTRATE SCRAP";
           badge.style.background = "#ef4444";
+        } else {
+          if (alertCard) alertCard.style.display = "none";
+
+          // Valid Solder Joint Metrology
+          document.getElementById("studio-kpi-vol").textContent = `${data.volume_nl.toFixed(2)} nL`;
+          document.getElementById("studio-kpi-zmax").textContent = `${data.peak_height_um.toFixed(1)} µm`;
+          document.getElementById("studio-kpi-toe").textContent = `${data.toe_wetting_angle_deg.toFixed(1)}°`;
+          document.getElementById("studio-kpi-heel").textContent = `${data.heel_wetting_angle_deg.toFixed(1)}°`;
+          document.getElementById("studio-kpi-coplanar").textContent = `${data.coplanarity_delta_um.toFixed(1)} µm`;
+          document.getElementById("studio-kpi-cov").textContent = `${data.wetted_coverage_pct.toFixed(1)}%`;
+
+          if (data.is_within_tolerance && data.coplanarity_delta_um <= 50.0) {
+            badge.textContent = "CLASS 3 PASS";
+            badge.style.background = "#10b981";
+          } else {
+            badge.textContent = "DEFECT VIOLATION";
+            badge.style.background = "#ef4444";
+          }
         }
       } catch (err) {
         console.error("Profile update failed:", err);
@@ -454,7 +501,7 @@
       function toPoints(arr) {
         return arr.map((z, idx) => {
           const x = pad + (idx / (arr.length - 1)) * (w - 2 * pad);
-          const y = h - pad - (z / maxZ) * (h - 2 * pad);
+          const y = h - pad - (Math.max(-50, Math.min(180, z)) / maxZ) * (h - 2 * pad);
           return `${x.toFixed(1)},${y.toFixed(1)}`;
         }).join(" ");
       }
@@ -463,6 +510,8 @@
       const idealPts = toPoints(zIdeal);
       const upperPts = toPoints(zUpper);
       const lowerPts = toPoints(zLower);
+
+      const isSolder = data.is_solder_applicable !== false;
 
       svg.innerHTML = `
         <!-- Axes -->
@@ -473,17 +522,17 @@
         <polyline points="${upperPts}" fill="none" stroke="#f59e0b" stroke-dasharray="3,3" stroke-width="1" />
         <polyline points="${lowerPts}" fill="none" stroke="#f59e0b" stroke-dasharray="3,3" stroke-width="1" />
         
-        <!-- Ideal Concave Target -->
+        <!-- Ideal Target Plane / Meniscus -->
         <polyline points="${idealPts}" fill="none" stroke="#38bdf8" stroke-dasharray="4,4" stroke-width="1.5" />
         
         <!-- Measured Physical Height Curve -->
-        <polyline points="${measPts}" fill="none" stroke="${data.is_within_tolerance ? '#34d399' : '#ef4444'}" stroke-width="2.5" />
+        <polyline points="${measPts}" fill="none" stroke="${(data.is_within_tolerance && isSolder) ? '#34d399' : '#ef4444'}" stroke-width="2.5" />
 
         <!-- Labels -->
         <text x="${pad + 6}" y="${pad + 10}" fill="#94a3b8" font-size="9" font-family="monospace">160 µm</text>
         <text x="${pad + 6}" y="${h - pad - 4}" fill="#94a3b8" font-size="9" font-family="monospace">0 µm</text>
-        <text x="${w - 110}" y="${pad + 10}" fill="#38bdf8" font-size="9" font-family="monospace">--- Ideal Meniscus</text>
-        <text x="${w - 110}" y="${pad + 22}" fill="${data.is_within_tolerance ? '#34d399' : '#ef4444'}" font-size="9" font-family="monospace">― Measured Z(x)</text>
+        <text x="${w - 140}" y="${pad + 10}" fill="#38bdf8" font-size="9" font-family="monospace">${isSolder ? '--- Ideal Meniscus' : '--- Nominal FR-4 Plane'}</text>
+        <text x="${w - 140}" y="${pad + 22}" fill="${(data.is_within_tolerance && isSolder) ? '#34d399' : '#ef4444'}" font-size="9" font-family="monospace">${isSolder ? '― Measured Z(x)' : '― Rupture Crater Z(x)'}</text>
       `;
     }
 
@@ -493,25 +542,52 @@
 
     function syncActivePhotometricBoard(boardInfo) {
       if (!boardInfo) return;
-      const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005');
-      const select = document.getElementById("studio-component-select");
-      
-      if (bId === "TB032" || bId.toLowerCase().includes("burn")) {
-        if (select) select.value = "BURN_HOLE";
-        loadStudioComponent("BURN_HOLE");
-      } else if (bId === "TB002" || bId === "TB023" || bId === "TB024") {
-        if (select) select.value = "C1_PAD_L";
-        loadStudioComponent("C1_PAD_L");
-      } else if (bId === "TB021" || bId === "TB022") {
-        if (select) select.value = "U2_PIN4";
-        loadStudioComponent("U2_PIN4");
-      } else if (bId === "TB012" || bId === "TB025") {
-        if (select) select.value = "R1_PAD_R";
-        loadStudioComponent("R1_PAD_R");
-      } else if (boardInfo.verdict === "PASS") {
-        if (select) select.value = "U1_PIN1";
-        loadStudioComponent("U1_PIN1");
+      const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005').trim().toUpperCase();
+      currentActiveBoardId = bId;
+
+      const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[bId]) || {};
+      const lbl = document.getElementById("studio-active-board-label");
+      if (lbl) {
+        lbl.textContent = meta.name ? `${bId} — ${meta.name}` : `${bId} — Active Board`;
       }
+
+      const select = document.getElementById("studio-component-select");
+      const alertCard = document.getElementById("applicability-alert-card");
+      
+      let targetComp = "U1_PIN1";
+
+      if (bId === "TB032" || bId.toLowerCase().includes("burn")) {
+        targetComp = "BURN_HOLE";
+        if (alertCard) alertCard.style.display = "block";
+      } else {
+        if (alertCard) alertCard.style.display = "none";
+
+        if (bId === "TB002" || bId === "TB023" || bId === "TB024") {
+          targetComp = "C1_PAD_L";
+        } else if (bId === "TB021" || bId === "TB022") {
+          targetComp = "U2_PIN4";
+        } else if (bId === "TB012" || bId === "TB025") {
+          targetComp = "R1_PAD_R";
+        } else if (meta.defect_type === "missing" || (boardInfo.defective_components > 0 && boardInfo.verdict === "FAIL")) {
+          // Missing component target - bare solder pad inspection
+          targetComp = "R1_PAD_R";
+          let opt = select ? select.querySelector('option[data-missing="true"]') : null;
+          if (!opt && select) {
+            opt = document.createElement("option");
+            opt.setAttribute("data-missing", "true");
+            select.insertBefore(opt, select.firstChild);
+          }
+          if (opt) {
+            opt.value = "R1_PAD_R";
+            opt.textContent = `${bId} — Missing Footprint (Bare Solder Pad - 0µm)`;
+          }
+        } else {
+          targetComp = "U1_PIN1";
+        }
+      }
+
+      if (select) select.value = targetComp;
+      loadStudioComponent(targetComp);
     }
 
     window.addEventListener("DOMContentLoaded", () => {

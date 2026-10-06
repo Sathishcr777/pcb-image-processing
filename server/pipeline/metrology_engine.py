@@ -38,8 +38,10 @@ class MetrologyEngine:
         cid = comp_info.get("id", "COMP")
         bbox = comp_info.get("bbox_xywh", [0, 0, 30, 30])
         _, _, w, h = bbox
+        if test_roi_bgr is None or ref_roi_bgr is None or test_roi_bgr.size == 0 or ref_roi_bgr.size == 0:
+            return self._empty_metrology_result(cid, "EMPTY_IMAGE")
 
-        if test_roi_bgr.shape[0] < 8 or test_roi_bgr.shape[1] < 8:
+        if test_roi_bgr.shape[0] < 8 or test_roi_bgr.shape[1] < 8 or ref_roi_bgr.shape[0] < 8 or ref_roi_bgr.shape[1] < 8:
             return self._empty_metrology_result(cid, "IMAGE_TOO_SMALL")
 
         gray_test = cv2.cvtColor(test_roi_bgr, cv2.COLOR_BGR2GRAY)

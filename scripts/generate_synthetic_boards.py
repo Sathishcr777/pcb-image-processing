@@ -165,14 +165,12 @@ def main():
         "TB031": {"defects": {"R12": "missing", "C3": "missing"}}
     }
 
-    for board_id, spec in test_specs.items():
-        defs = spec.get("defects", {})
-        s_off = spec.get("shift_offset", (0, 0))
-        img = render_pcb(defects=defs, shift_offset=s_off)
-        file_path = os.path.join(tb_dir, f"{board_id}.png")
-        cv2.imwrite(file_path, img)
-
-    print(f"[SUCCESS] Rendered all 31 test boards in {tb_dir}")
+def main():
+    try:
+        from scripts.build_complete_test_boards import main as build_main
+        build_main()
+    except Exception as e:
+        print(f"[WARN] Delegating to build_complete_test_boards failed: {e}")
 
 if __name__ == "__main__":
     main()

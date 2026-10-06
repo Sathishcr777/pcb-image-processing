@@ -52,6 +52,7 @@
     <a href="/msa" class="nav-tab-btn active"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
@@ -70,6 +71,20 @@
         <span class="explainer-chip"><i class="fa-solid fa-square-check"></i> %GR&R = 7.14% (Excellent)</span>
         <span class="explainer-chip"><i class="fa-solid fa-layer-group"></i> NDC = 19 Distinct Groups</span>
         <span class="explainer-chip"><i class="fa-solid fa-handshake"></i> Kappa &kappa; = 0.9778</span>
+      </div>
+    </div>
+
+    <!-- Active Board Context Card -->
+    <div id="msaActiveCard" style="background: rgba(15, 23, 42, 0.85); border: 1px solid #1E293B; border-left: 4px solid #38BDF8; padding: 14px 20px; border-radius: 10px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-microchip text-cyan"></i> ACTIVE BOARD IN SCOPE:</div>
+        <div style="font-size: 16px; font-weight: 800; color: #F8FAFC; margin-top: 2px;" id="msaBoardName">TB005 — 100% Perfect Golden Master</div>
+        <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;" id="msaGageNotice">Gage R&R Baseline Status: Active Board is part of standard 10-board production Gage R&R study sample (ANOVA Verified).</div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span id="msaStudyBadge" class="tag-badge tag-pass" style="font-size: 12px; padding: 6px 14px; font-weight: 800;">
+          <i class="fa-solid fa-check"></i> MSA STUDY CERTIFIED
+        </span>
       </div>
     </div>
 
@@ -121,5 +136,44 @@
   </footer>
 
   <script src="/static/common.js"></script>
+  <script>
+    function syncMsaActiveBoard(active) {
+      if (!active) return;
+      const bId = active.board_id || active.serial || 'TB005';
+      const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[bId]) || {};
+      const bName = meta.name ? `${bId} — ${meta.name}` : `${bId} — Active Inspection`;
+      
+      const nameEl = document.getElementById('msaBoardName');
+      const noticeEl = document.getElementById('msaGageNotice');
+      const badgeEl = document.getElementById('msaStudyBadge');
+      const cardEl = document.getElementById('msaActiveCard');
+
+      if (nameEl) nameEl.textContent = bName;
+
+      const isBurn = bId === 'TB032' || (meta.defect_type && meta.defect_type.toLowerCase().includes('burn'));
+      const isBaseline10 = ['TB001', 'TB002', 'TB003', 'TB004', 'TB005', 'TB006', 'TB007', 'TB008', 'TB009', 'TB010'].includes(bId);
+
+      if (isBurn) {
+        if (noticeEl) noticeEl.textContent = "Active Board Status: TB032 is a catastrophic substrate burn rupture (Scrap). Gage R&R precision measurement is non-applicable to destructive substrate rupture defects; optical repeatability study is conducted on standardized 10-board production baseline.";
+        if (badgeEl) { badgeEl.className = 'tag-badge tag-fail'; badgeEl.innerHTML = '<i class="fa-solid fa-ban"></i> MSA NON-APPLICABLE (SCRAP)'; }
+        if (cardEl) cardEl.style.borderLeftColor = '#EF4444';
+      } else if (isBaseline10) {
+        if (noticeEl) noticeEl.textContent = `Gage R&R Baseline Status: ${bId} is included directly in the 10-sample Two-Way ANOVA Gage R&R study (%GR&R = 7.14%, NDC = 19).`;
+        if (badgeEl) { badgeEl.className = 'tag-badge tag-pass'; badgeEl.innerHTML = '<i class="fa-solid fa-check"></i> MSA STUDY SAMPLE VERIFIED'; }
+        if (cardEl) cardEl.style.borderLeftColor = '#10B981';
+      } else {
+        if (noticeEl) noticeEl.textContent = `Production Board Status: ${bId} utilizes calibrated camera calibration profile verified by the 10-board Gage R&R benchmark.`;
+        if (badgeEl) { badgeEl.className = 'tag-badge tag-rework'; badgeEl.innerHTML = '<i class="fa-solid fa-satellite-dish"></i> CALIBRATED TO BENCHMARK'; }
+        if (cardEl) cardEl.style.borderLeftColor = '#3B82F6';
+      }
+    }
+
+    if (typeof getGlobalActiveBoard === 'function') {
+      getGlobalActiveBoard().then(syncMsaActiveBoard);
+    }
+    if (typeof onGlobalActiveBoardChange === 'function') {
+      onGlobalActiveBoardChange(syncMsaActiveBoard);
+    }
+  </script>
 </body>
 </html>

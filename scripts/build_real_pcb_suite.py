@@ -92,7 +92,7 @@ def create_real_pcb_master():
     cv2.putText(board_master, 'R12', (400, 304), cv2.FONT_HERSHEY_SIMPLEX, 0.40, silk_color, 1, cv2.LINE_AA)
     cv2.putText(board_master, 'C5', (405, 514), cv2.FONT_HERSHEY_SIMPLEX, 0.40, silk_color, 1, cv2.LINE_AA)
     
-    cv2.putText(board_master, 'SMT INDUSTRIAL PRODUCTION MASTER — IPC-A-610H CLASS 3', (60, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.55, silk_color, 1, cv2.LINE_AA)
+    cv2.putText(board_master, 'SMT INDUSTRIAL PRODUCTION MASTER â€” IPC-A-610H CLASS 3', (60, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.55, silk_color, 1, cv2.LINE_AA)
     cv2.putText(board_master, 'CE  RoHS  FC', (1120, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.48, silk_color, 1, cv2.LINE_AA)
     
     gold = (70, 190, 230)

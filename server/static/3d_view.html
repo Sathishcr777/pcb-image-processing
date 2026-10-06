@@ -20,7 +20,7 @@
       position: relative;
       width: 100%;
       height: calc(100vh - 210px);
-      min-height: 560px;
+      min-height: 600px;
       background: radial-gradient(circle at center, #111827 0%, #060913 100%);
       border-radius: 12px;
       border: 1px solid #1E293B;
@@ -36,13 +36,14 @@
       position: absolute;
       top: 15px;
       left: 15px;
-      background: rgba(15, 23, 42, 0.9);
-      backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(10px);
       border: 1px solid #334155;
       padding: 12px 18px;
       border-radius: 8px;
       color: #FFFFFF;
       z-index: 10;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
     .hud-controls-overlay {
       position: absolute;
@@ -61,19 +62,267 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .component-tooltip-3d {
+
+    /* Digital Twin Right Side Panel */
+    .digital-twin-side-panel {
       position: absolute;
       top: 15px;
       right: 15px;
+      width: 360px;
+      max-height: calc(100% - 95px);
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #FFFFFF;
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+      overflow-y: auto;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    .digital-twin-side-panel.collapsed {
+      transform: translateX(390px);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .twin-panel-toggle-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #334155;
+      color: #38BDF8;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 16;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
+    }
+    .twin-panel-toggle-btn:hover {
+      background: #1E293B;
+      color: #FFFFFF;
+      border-color: #38BDF8;
+    }
+
+    .twin-section-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #1E293B;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .twin-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+      padding-bottom: 6px;
+    }
+    .twin-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Health Index & Usability */
+    .twin-metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .twin-metric-cell {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .twin-cell-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94A3B8;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .twin-hi-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+    .twin-hi-denom {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748B;
+    }
+    .twin-progress-track {
+      width: 100%;
+      height: 6px;
+      background: #1E293B;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .twin-progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+
+    .twin-usability-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+    }
+    .usability-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34D399;
+      border: 1px solid #10B981;
+    }
+    .usability-rework {
+      background: rgba(245, 158, 11, 0.2);
+      color: #FBBF24;
+      border: 1px solid #F59E0B;
+    }
+    .usability-fail {
+      background: rgba(239, 68, 68, 0.2);
+      color: #F87171;
+      border: 1px solid #EF4444;
+    }
+
+    /* Pipeline Flow Breadcrumbs */
+    .twin-pipeline-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0B1120;
+      border: 1px solid #1E293B;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 10px;
+      color: #94A3B8;
+      overflow-x: auto;
+    }
+    .flow-arrow {
+      color: #475569;
+      font-size: 9px;
+      margin: 0 2px;
+    }
+
+    /* Detected Defects List */
+    .twin-defects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .twin-defect-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-left: 3px solid #EF4444;
+      border-top: 1px solid #334155;
+      border-right: 1px solid #334155;
+      border-bottom: 1px solid #334155;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+    .twin-defect-card:hover {
+      background: rgba(51, 65, 85, 0.8);
+      transform: translateY(-1px);
+    }
+    .twin-defect-card.card-rework {
+      border-left-color: #F59E0B;
+    }
+    .twin-defect-card.active-selected {
+      border-color: #38BDF8 !important;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+    .twin-defect-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .twin-defect-type {
+      font-size: 12px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .twin-severity-pill {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+    .sev-critical {
+      background: rgba(239, 68, 68, 0.3);
+      color: #F87171;
+      border: 1px solid #EF4444;
+    }
+    .sev-major {
+      background: rgba(245, 158, 11, 0.3);
+      color: #FBBF24;
+      border: 1px solid #F59E0B;
+    }
+    .twin-defect-meta {
+      font-size: 11px;
+      color: #CBD5E1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .twin-no-defects {
+      text-align: center;
+      padding: 16px 10px;
+      color: #94A3B8;
+    }
+    .twin-no-defects i {
+      font-size: 24px;
+      color: #10B981;
+      margin-bottom: 6px;
+    }
+
+    /* Component Tooltip */
+    .component-tooltip-3d {
       background: rgba(15, 23, 42, 0.95);
       border: 1px solid #3B82F6;
-      padding: 14px 18px;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border-radius: 6px;
       color: #FFFFFF;
-      min-width: 270px;
-      z-index: 10;
       display: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -107,11 +356,10 @@
   </header>
 
   <!-- Multi-Page Industrial Navigation Menu -->
-      <nav class="ind-nav-menu">
+  <nav class="ind-nav-menu">
     <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
-    <a href="/3d-view" class="nav-tab-btn active"><i class="fa-solid fa-cube"></i> 360° 3D Digital Twin</a>
+    <a href="/3d-view" class="nav-tab-btn active"><i class="fa-solid fa-cube"></i> 3D Digital Twin</a>
     <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
-    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
     <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
     <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
     <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
@@ -119,7 +367,7 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
-    <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
   </nav>
 
   <main class="ind-dashboard">
@@ -130,13 +378,14 @@
           <i class="fa-solid fa-cube text-primary"></i> Interactive 3D WebGL Digital Twin & Elevation Relief
         </div>
         <p class="page-explainer-desc">
-          Renders a full 3D topographical reconstruction of the inspected PCB directly in WebGL. Extrudes components in 3D height based on monocular depth estimation, simulates physical tombstone tilt angles (45°) and rotational skew, and lets you click any component to inspect its live IPC-A-610 metrology measurements.
+          Renders a full 3D topographical reconstruction of the inspected PCB directly in WebGL with live defect markers, real-time Health Index calculation, and production usability determination.
         </p>
       </div>
       <div class="page-explainer-chips">
         <span class="explainer-chip"><i class="fa-solid fa-arrows-rotate"></i> 360° Orbit & Zoom</span>
         <span class="explainer-chip"><i class="fa-solid fa-image"></i> Real Image Texture</span>
-        <span class="explainer-chip"><i class="fa-solid fa-arrow-up-right-dots"></i> 3D Defect Simulation</span>
+        <span class="explainer-chip"><i class="fa-solid fa-triangle-exclamation"></i> Live Defect Markers</span>
+        <span class="explainer-chip"><i class="fa-solid fa-heart-pulse"></i> Board Health Index</span>
       </div>
     </div>
 
@@ -154,18 +403,78 @@
         </div>
       </div>
 
-      <!-- Component Inspector Tooltip Top Right -->
-      <div class="component-tooltip-3d" id="componentTooltip3D">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 8px;">
-          <strong style="color: #38BDF8; font-size: 15px;" id="tooltipCompId">U1</strong>
-          <span class="tag-badge tag-pass" id="tooltipCompBadge">PASS</span>
+      <!-- Toggle button for side panel -->
+      <button class="twin-panel-toggle-btn" id="twinPanelToggleBtn" title="Toggle Defect & Quality Panel">
+        <i class="fa-solid fa-bars-staggered"></i>
+      </button>
+
+      <!-- Digital Twin Right Side Panel: Health Index, Usability, Detected Defects -->
+      <div class="digital-twin-side-panel" id="digitalTwinSidePanel">
+        <!-- 1. Health Index & Usability Card -->
+        <div class="twin-section-card">
+          <div class="twin-card-header">
+            <div class="twin-card-title"><i class="fa-solid fa-gauge-high text-cyan"></i> BOARD QUALITY & USABILITY</div>
+            <span class="tag-badge tag-pass" id="twinVerdictBadge">PASS</span>
+          </div>
+
+          <div class="twin-metrics-grid">
+            <div class="twin-metric-cell">
+              <div class="twin-cell-label">HEALTH INDEX</div>
+              <div class="twin-hi-number text-pass" id="twinHiNumber">
+                <span id="twinHiScoreVal">100</span> <span class="twin-hi-denom">/ 100</span>
+              </div>
+              <div class="twin-progress-track">
+                <div class="twin-progress-fill" id="twinHiProgressFill" style="width: 100%; background: #10B981;"></div>
+              </div>
+            </div>
+
+            <div class="twin-metric-cell">
+              <div class="twin-cell-label">BOARD USABILITY</div>
+              <div class="twin-usability-badge usability-pass" id="twinUsabilityBadge">
+                <i class="fa-solid fa-circle-check"></i> <span id="twinUsabilityText">USABLE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pipeline Trace Breadcrumb -->
+          <div class="twin-pipeline-flow">
+            <span>PCB: <strong id="flowBoardId">TB005</strong></span>
+            <i class="fa-solid fa-chevron-right flow-arrow"></i>
+            <span>Defects: <strong id="flowDefectCount">0</strong></span>
+            <i class="fa-solid fa-chevron-right flow-arrow"></i>
+            <span>HI: <strong id="flowHI">100/100</strong></span>
+            <i class="fa-solid fa-chevron-right flow-arrow"></i>
+            <span id="flowUsabilityTag" style="font-weight: 700; color: #34D399;">USABLE</span>
+          </div>
         </div>
-        <div style="font-size: 12px; color: #CBD5E1; display: flex; flex-direction: column; gap: 4px;">
-          <div>Name: <strong style="color: #FFFFFF;" id="tooltipCompName">Main MCU</strong></div>
-          <div>Measured Shift: <code id="tooltipCompShift">ΔX: 0.00mm, ΔY: 0.00mm</code></div>
-          <div>Rotation: <code id="tooltipCompRot">Δθ: 0.00°</code></div>
-          <div>Side Overhang: <code id="tooltipCompOverhang">0.0%</code></div>
-          <div>Status: <strong style="color: #34D399;" id="tooltipCompIPC">IPC Class 3 Target</strong></div>
+
+        <!-- 2. Detected Defects Panel -->
+        <div class="twin-section-card">
+          <div class="twin-card-header">
+            <div class="twin-card-title">
+              <i class="fa-solid fa-triangle-exclamation text-amber"></i> DETECTED DEFECTS
+            </div>
+            <span class="tag-badge" id="twinDefectCountBadge" style="background: rgba(148, 163, 184, 0.2); color: #CBD5E1; border: 1px solid #475569;">0 Defects</span>
+          </div>
+
+          <div class="twin-defects-list" id="twinDefectsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- 3. Component Details (shown on click) -->
+        <div class="component-tooltip-3d" id="componentTooltip3D">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 8px;">
+            <strong style="color: #38BDF8; font-size: 14px;" id="tooltipCompId">U1</strong>
+            <span class="tag-badge tag-pass" id="tooltipCompBadge">PASS</span>
+          </div>
+          <div style="font-size: 11px; color: #CBD5E1; display: flex; flex-direction: column; gap: 4px;">
+            <div>Name: <strong style="color: #FFFFFF;" id="tooltipCompName">Main MCU</strong></div>
+            <div>Measured Shift: <code id="tooltipCompShift">&Delta;X: 0.00mm, &Delta;Y: 0.00mm</code></div>
+            <div>Rotation: <code id="tooltipCompRot">&Delta;&theta;: 0.00&deg;</code></div>
+            <div>Side Overhang: <code id="tooltipCompOverhang">0.0%</code></div>
+            <div>Status: <strong style="color: #34D399;" id="tooltipCompIPC">IPC Class 3 Target</strong></div>
+          </div>
         </div>
       </div>
 
@@ -174,22 +483,29 @@
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 12px; font-weight: 700; color: #CBD5E1;">Board Scenario:</label>
           <select id="boardSelect3D" class="ind-select" style="padding: 7px 12px;">
-            <optgroup label="Golden Standard">
-              <option value="TB005" selected>TB005 - 100% Perfect Board</option>
+            <optgroup label="Golden Standard (Pass)">
+              <option value="TB005" selected>TB005 - 100% Perfect Golden Master</option>
               <option value="TB006">TB006 - Golden Reference Sample 2</option>
+              <option value="TB007">TB007 - Verified Reference Sample 3</option>
             </optgroup>
-            <optgroup label="Structural Defects">
-              <option value="TB002">TB002 - C3 Tombstoned (45° Tilt Lift)</option>
-              <option value="TB003">TB003 - R12 Tilted & U2 Shifted</option>
-              <option value="TB004">TB004 - C5 Shifted Overhang</option>
+            <optgroup label="Catastrophic Substrate Defects">
+              <option value="TB032">TB032 - Substrate Thermal Burn Hole & Carbonized FR-4 Rupture (SCRAP)</option>
+              <option value="TB031">TB031 - Multi-Component Solder Defect Array</option>
+            </optgroup>
+            <optgroup label="Structural & Component Defects">
+              <option value="TB002">TB002 - C_R1 Tombstoned (45° Tilt Lift)</option>
+              <option value="TB003">TB003 - U2 Angular Tilt & Skew</option>
+              <option value="TB004">TB004 - U1 Placement Shift & Overhang</option>
+              <option value="TB021">TB021 - Missing SMT Component Array</option>
+              <option value="TB022">TB022 - High-Density Pin-1 Polar Inversion</option>
+              <option value="TB023">TB023 - 0402 Severe Micro-Tombstoning</option>
               <option value="TB024">TB024 - U1 Micro-Rotation Defect</option>
+              <option value="TB025">TB025 - Insufficient Solder Joint Voiding</option>
             </optgroup>
-            <optgroup label="Missing Defects">
-              <option value="TB001">TB001 - U1 MCU Missing (Ghost ROI)</option>
-              <option value="TB010">TB010 - U2 Flash Missing</option>
-              <option value="TB014">TB014 - Multi-Part Missing</option>
-              <option value="TB016">TB016 - J_BOT1 Header Missing</option>
-              <option value="TB032">TB032 - Severe Substrate Burn & Thermal Hole</option>
+            <optgroup label="Missing Component Defects">
+              <option value="TB001">TB001 - Production Batch Master</option>
+              <option value="TB010">TB010 - U1 Angular Skew / Missing Flash</option>
+              <option value="TB014">TB014 - Multi-Part Missing & Tombstone Array</option>
             </optgroup>
           </select>
 
@@ -245,6 +561,8 @@
       controls.dampingFactor = 0.05;
       controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
+      const clock = new THREE.Clock();
+
       // 2. Lighting Setup
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
       scene.add(ambientLight);
@@ -263,10 +581,10 @@
       grid.position.y = -10;
       scene.add(grid);
 
-      // Board Dimensions in 3D world units (Square 100x100 for true 1:1 PCB)
+      // Board Dimensions in 3D world units
       const boardWidth = 100;
-      const boardLength = 100;
-      const boardThickness = 2.0;
+      const boardLength = 80;
+      const boardThickness = 1.8;
 
       // Texture Loader
       const textureLoader = new THREE.TextureLoader();
@@ -277,19 +595,431 @@
       const componentGroup = new THREE.Group();
       scene.add(componentGroup);
 
+      const defectGroup = new THREE.Group();
+      scene.add(defectGroup);
+
+      let activeDefectMarkers = [];
       let currentZScale = 2.5;
       let isWireframe = false;
       let componentsData = [];
       let metrologyData = [];
-      let imgWidth = 1024;
-      let imgHeight = 1024;
+      let currentActiveBoardId = 'TB005';
+      let currentExtractedDefects = [];
 
       // Raycaster for click-to-inspect
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
+      const tooltip = document.getElementById('componentTooltip3D');
+
+      // --- Helper: Create 3D Billboard Sprite Badge for Defect Label ---
+      function createDefectSprite(titleText, subtitleText, isCritical) {
+        const c = document.createElement('canvas');
+        c.width = 320;
+        c.height = 96;
+        const ctx = c.getContext('2d');
+
+        const bgColor = isCritical ? 'rgba(239, 68, 68, 0.95)' : 'rgba(245, 158, 11, 0.95)';
+        const strokeColor = isCritical ? '#FCA5A5' : '#FDE68A';
+
+        // Rounded badge
+        const r = 16, x = 4, y = 4, w = 312, h = 88;
+        ctx.fillStyle = bgColor;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Main Title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(titleText, 160, 36);
+
+        // Subtitle
+        ctx.fillStyle = '#F8FAFC';
+        ctx.font = '600 16px sans-serif';
+        ctx.fillText(subtitleText, 160, 68);
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.minFilter = THREE.LinearFilter;
+        const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, depthWrite: false });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.set(18, 5.4, 1);
+        return sprite;
+      }
+
+      // --- Extract Actual Defects from Inspection Data ---
+      function extractDefectsFromInspection(res, boardId) {
+        const comps = res.per_component_results || res.components || [];
+        const metrology = res.metrology || [];
+        const hi = (res.health_index != null) ? Number(res.health_index) : 1.0;
+        const verdict = res.verdict || (hi >= 0.95 ? 'PASS' : (hi >= 0.80 ? 'REWORK' : 'FAIL'));
+        const defects = [];
+
+        // Check for Substrate Burn Defect (TB032 or burn scenarios)
+        const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[boardId]) || {};
+        const isBurn = (boardId === 'TB032') || (meta.defect_type || '').toLowerCase().includes('burn') || comps.some(c => (c.defect_type || '').toLowerCase().includes('burn'));
+        if (isBurn) {
+          defects.push({
+            id: 'FR4_CRATER',
+            componentId: 'FR4_CRATER',
+            name: 'FR-4 Substrate Power Stage',
+            type: 'Thermal Burn Hole & Carbonized FR-4 Rupture',
+            location: 'Center Substrate [X: 512, Y: 512]',
+            severity: 'CRITICAL',
+            ipcVerdict: 'IPC-A-610 Section 10.2 Scrap Violation',
+            details: 'Substrate thermal rupture & copper trace vaporization',
+            isCritical: true,
+            pos3D: { x: 0, y: 1.5, z: 0 },
+            isBurn: true
+          });
+        }
+
+        comps.forEach(c => {
+          const isMissing = Boolean(c.is_missing);
+          const isTombstone = Boolean(c.tombstone_flag);
+          const isTilt = Boolean(c.tilt_flag);
+          const isHeight = Boolean(c.height_flag);
+          const metro = metrology.find(m => m.component_id === c.id) || {};
+          const maxOverhang = metro.max_overhang_pct || 0;
+          const rotDeg = metro.rotation_deg || 0;
+          const hasOverhangDefect = maxOverhang > 50.0;
+          const hasRotDefect = Math.abs(rotDeg) > 6.0;
+          const hasMetroFail = metro.metrology_pass === false;
+
+          const isDefective = Boolean(c.is_defective) || isMissing || isTombstone || isTilt || isHeight || (c.status && c.status !== 'PASS') || hasOverhangDefect || hasRotDefect;
+
+          if (isDefective) {
+            let defectType = 'Structural Anomaly';
+            let severity = 'MAJOR';
+            let isCritical = false;
+
+            if (isTombstone) {
+              defectType = 'Tombstone Lift (45° Tilt)';
+              severity = 'CRITICAL';
+              isCritical = true;
+            } else if (isMissing) {
+              defectType = 'Missing Component (Ghost ROI)';
+              severity = 'CRITICAL';
+              isCritical = true;
+            } else if (isTilt || hasRotDefect) {
+              defectType = `Rotational Skew / Tilt (${rotDeg > 0 ? '+' : ''}${rotDeg.toFixed(1)}°)`;
+              severity = Math.abs(rotDeg) > 10.0 ? 'CRITICAL' : 'MAJOR';
+              isCritical = Math.abs(rotDeg) > 10.0;
+            } else if (isHeight) {
+              defectType = 'Height / Unseated Component';
+              severity = 'MAJOR';
+            } else if (c.status === 'SHIFT' || hasOverhangDefect) {
+              defectType = `Component Shift (${maxOverhang.toFixed(1)}% Overhang)`;
+              severity = hasOverhangDefect ? 'CRITICAL' : 'MAJOR';
+              isCritical = hasOverhangDefect;
+            } else if (c.status) {
+              defectType = `${c.status} Defect`;
+            }
+
+            const [bx, by, bw, bh] = c.bbox_px || c.bbox_xywh || [0, 0, 30, 30];
+            const posX = ((bx + bw / 2) / 1024) * boardWidth - (boardWidth / 2);
+            const posZ = ((by + bh / 2) / 1024) * boardLength - (boardLength / 2);
+
+            defects.push({
+              id: c.id,
+              componentId: c.id,
+              name: c.name || c.id,
+              type: defectType,
+              location: `${c.id} [X:${Math.round(bx)}, Y:${Math.round(by)}]`,
+              severity: severity,
+              isCritical: isCritical,
+              ipcVerdict: metro.ipc_class_verdict || (isCritical ? 'IPC-A-610 Defect Violation' : 'IPC-A-610 Process Indicator'),
+              details: `Overhang: ${maxOverhang.toFixed(1)}% • Skew: ${rotDeg.toFixed(1)}°`,
+              pos3D: { x: posX, y: 3.5, z: posZ },
+              comp: c,
+              metro: metro
+            });
+          }
+        });
+
+        return { defects, hi, verdict };
+      }
+
+      // --- Render Defect Information Panel & Health Index HUD ---
+      function updateDefectsAndHealthPanel(res, boardId, defects) {
+        const hi = (res.health_index != null) ? Number(res.health_index) : 1.0;
+        const hiScore = Math.round(hi * 100);
+        const verdict = res.verdict || (hi >= 0.95 && defects.length === 0 ? 'PASS' : (hi >= 0.80 ? 'REWORK' : 'FAIL'));
+
+        // 1. Health Index Value & Color
+        const elHiVal = document.getElementById('twinHiScoreVal');
+        const elHiNumber = document.getElementById('twinHiNumber');
+        const elHiBar = document.getElementById('twinHiProgressFill');
+
+        if (elHiVal) elHiVal.textContent = hiScore;
+        let hiColor = '#10B981';
+        let hiColorClass = 'text-pass';
+
+        if (hiScore < 80 || verdict === 'FAIL') {
+          hiColor = '#EF4444';
+          hiColorClass = 'text-fail';
+        } else if (hiScore < 95 || verdict === 'REWORK') {
+          hiColor = '#F59E0B';
+          hiColorClass = 'text-amber';
+        }
+
+        if (elHiNumber) elHiNumber.className = `twin-hi-number ${hiColorClass}`;
+        if (elHiBar) {
+          elHiBar.style.width = `${Math.min(100, Math.max(0, hiScore))}%`;
+          elHiBar.style.backgroundColor = hiColor;
+        }
+
+        // 2. Verdict Badge
+        const elVerdictBadge = document.getElementById('twinVerdictBadge');
+        if (elVerdictBadge) {
+          elVerdictBadge.textContent = verdict;
+          if (verdict === 'PASS') {
+            elVerdictBadge.className = 'tag-badge tag-pass';
+          } else if (verdict === 'REWORK') {
+            elVerdictBadge.className = 'tag-badge tag-rework';
+          } else {
+            elVerdictBadge.className = 'tag-badge tag-fail';
+          }
+        }
+
+        // 3. Board Usability
+        const elUsabilityBadge = document.getElementById('twinUsabilityBadge');
+        const elUsabilityText = document.getElementById('twinUsabilityText');
+        let usabilityText = 'USABLE FOR PRODUCTION';
+        let usabilityClass = 'usability-pass';
+        let usabilityIcon = '<i class="fa-solid fa-circle-check"></i>';
+        let flowUsabilityText = 'USABLE';
+        let flowUsabilityColor = '#34D399';
+
+        if (verdict === 'FAIL' || hiScore < 80) {
+          usabilityText = 'NOT USABLE / REJECT';
+          usabilityClass = 'usability-fail';
+          usabilityIcon = '<i class="fa-solid fa-circle-xmark"></i>';
+          flowUsabilityText = 'REJECT';
+          flowUsabilityColor = '#F87171';
+        } else if (verdict === 'REWORK' || defects.length > 0) {
+          usabilityText = 'REQUIRES REVIEW';
+          usabilityClass = 'usability-rework';
+          usabilityIcon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+          flowUsabilityText = 'REVIEW';
+          flowUsabilityColor = '#FBBF24';
+        }
+
+        if (elUsabilityBadge) {
+          elUsabilityBadge.className = `twin-usability-badge ${usabilityClass}`;
+          elUsabilityBadge.innerHTML = `${usabilityIcon} <span>${usabilityText}</span>`;
+        }
+
+        // 4. Pipeline Trace Breadcrumbs
+        const elFlowBoard = document.getElementById('flowBoardId');
+        const elFlowDefects = document.getElementById('flowDefectCount');
+        const elFlowHI = document.getElementById('flowHI');
+        const elFlowUsability = document.getElementById('flowUsabilityTag');
+
+        if (elFlowBoard) elFlowBoard.textContent = boardId;
+        if (elFlowDefects) elFlowDefects.textContent = defects.length;
+        if (elFlowHI) elFlowHI.textContent = `${hiScore}/100`;
+        if (elFlowUsability) {
+          elFlowUsability.textContent = flowUsabilityText;
+          elFlowUsability.style.color = flowUsabilityColor;
+        }
+
+        // 5. Defect Count Badge
+        const elDefectPill = document.getElementById('twinDefectCountBadge');
+        if (elDefectPill) {
+          elDefectPill.textContent = `${defects.length} Defect${defects.length === 1 ? '' : 's'}`;
+          if (defects.length === 0) {
+            elDefectPill.style.background = 'rgba(16, 185, 129, 0.2)';
+            elDefectPill.style.color = '#34D399';
+            elDefectPill.style.borderColor = '#10B981';
+          } else if (verdict === 'FAIL') {
+            elDefectPill.style.background = 'rgba(239, 68, 68, 0.2)';
+            elDefectPill.style.color = '#F87171';
+            elDefectPill.style.borderColor = '#EF4444';
+          } else {
+            elDefectPill.style.background = 'rgba(245, 158, 11, 0.2)';
+            elDefectPill.style.color = '#FBBF24';
+            elDefectPill.style.borderColor = '#F59E0B';
+          }
+        }
+
+        // 6. Detected Defects List Cards
+        const elDefectsList = document.getElementById('twinDefectsList');
+        if (!elDefectsList) return;
+
+        if (defects.length === 0) {
+          elDefectsList.innerHTML = `
+            <div class="twin-no-defects">
+              <i class="fa-solid fa-circle-check"></i>
+              <div style="font-weight: 700; color: #FFFFFF; font-size: 13px;">No critical defects detected</div>
+              <div style="font-size: 11px; color: #94A3B8; margin-top: 3px;">All 12 components conform to IPC-A-610H Class 3 Target tolerance.</div>
+            </div>
+          `;
+          return;
+        }
+
+        elDefectsList.innerHTML = defects.map((d, idx) => {
+          const isCrit = d.isCritical || d.severity === 'CRITICAL';
+          return `
+            <div class="twin-defect-card ${isCrit ? '' : 'card-rework'}" data-comp-id="${d.componentId}" id="defectCard_${d.componentId}">
+              <div class="twin-defect-head">
+                <div class="twin-defect-type">
+                  <i class="fa-solid ${isCrit ? 'fa-circle-xmark text-fail' : 'fa-triangle-exclamation text-amber'}"></i>
+                  ${d.type}
+                </div>
+                <span class="twin-severity-pill ${isCrit ? 'sev-critical' : 'sev-major'}">${d.severity}</span>
+              </div>
+              <div class="twin-defect-meta">
+                <div><strong>Component/Location:</strong> ${d.name} (${d.location})</div>
+                <div><strong>Severity:</strong> <span style="font-weight: 700; color: ${isCrit ? '#F87171' : '#FBBF24'}">${d.severity}</span> &bull; <strong>Verdict:</strong> ${d.ipcVerdict}</div>
+                <div><strong>Measurements:</strong> <code>${d.details}</code></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Card Click Handler to Focus in 3D
+        defects.forEach(d => {
+          const cardEl = document.getElementById(`defectCard_${d.componentId}`);
+          if (cardEl) {
+            cardEl.addEventListener('click', () => {
+              // Highlight card
+              document.querySelectorAll('.twin-defect-card').forEach(c => c.classList.remove('active-selected'));
+              cardEl.classList.add('active-selected');
+
+              // Move camera towards defect
+              focusCameraOnPoint(d.pos3D.x, d.pos3D.y, d.pos3D.z);
+
+              // Show component details in tooltip
+              showComponentDetails(d.comp || { id: d.componentId, name: d.name, status: d.type }, d.metro || {});
+            });
+          }
+        });
+      }
+
+      // --- Focus Camera Smoothly on 3D Point ---
+      function focusCameraOnPoint(tx, ty, tz) {
+        controls.target.set(tx, ty, tz);
+        camera.position.set(tx + 20, ty + 40, tz + 40);
+        controls.update();
+      }
+
+      // --- Show Component Inspector Tooltip ---
+      function showComponentDetails(comp, metro) {
+        if (!comp) return;
+        tooltip.style.display = 'block';
+        document.getElementById('tooltipCompId').textContent = comp.id || 'N/A';
+        document.getElementById('tooltipCompName').textContent = comp.name || 'Component';
+        document.getElementById('tooltipCompShift').textContent = `ΔX: ${(metro.delta_x_mm || 0).toFixed(3)}mm, ΔY: ${(metro.delta_y_mm || 0).toFixed(3)}mm`;
+        document.getElementById('tooltipCompRot').textContent = `Δθ: ${(metro.rotation_deg || 0).toFixed(2)}°`;
+        document.getElementById('tooltipCompOverhang').textContent = `${(metro.max_overhang_pct || 0).toFixed(1)}%`;
+
+        const badge = document.getElementById('tooltipCompBadge');
+        const ipcText = document.getElementById('tooltipCompIPC');
+
+        if (comp.status === 'PASS' || (!comp.is_defective && !comp.status)) {
+          badge.className = 'tag-badge tag-pass';
+          badge.textContent = 'PASS';
+          ipcText.textContent = metro.ipc_class_verdict || 'IPC Class 3 Target (Pass)';
+          ipcText.style.color = '#34D399';
+        } else if (comp.status === 'REWORK' || comp.status === 'TILT' || comp.status === 'SHIFT') {
+          badge.className = 'tag-badge tag-rework';
+          badge.textContent = 'REWORK';
+          ipcText.textContent = metro.ipc_class_verdict || 'IPC Class 2 Acceptable / Skew';
+          ipcText.style.color = '#FBBF24';
+        } else {
+          badge.className = 'tag-badge tag-fail';
+          badge.textContent = 'DEFECT';
+          ipcText.textContent = metro.ipc_class_verdict || 'IPC-A-610 Defect Violation';
+          ipcText.style.color = '#F87171';
+        }
+      }
+
+      // --- Render 3D Defect Markers Directly on the 3D PCB ---
+      function render3DDefectMarkers(defects, boardWidth, boardLength, boardThickness) {
+        // Clear previous defect markers
+        while (defectGroup.children.length > 0) {
+          const child = defectGroup.children[0];
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (child.material.map) child.material.map.dispose();
+            child.material.dispose();
+          }
+          defectGroup.remove(child);
+        }
+        activeDefectMarkers = [];
+
+        if (!defects || defects.length === 0) return;
+
+        defects.forEach((d, idx) => {
+          const px = d.pos3D.x;
+          const pz = d.pos3D.z;
+          const isCrit = d.isCritical || d.severity === 'CRITICAL';
+          const markerY = 14 + (idx % 2) * 3; // Stagger heights slightly if close
+
+          // 1. Floating Billboard Sprite Badge
+          const title = `${d.componentId}: ${d.severity}`;
+          const subtitle = d.type.length > 24 ? d.type.substring(0, 22) + '...' : d.type;
+          const sprite = createDefectSprite(title, subtitle, isCrit);
+          sprite.position.set(px, markerY, pz);
+          sprite.userData = { isDefectMarker: true, defect: d };
+          defectGroup.add(sprite);
+
+          // 2. Vertical Tether Line connecting Floating Badge to PCB Surface
+          const linePoints = [
+            new THREE.Vector3(px, (boardThickness / 2) + 0.5, pz),
+            new THREE.Vector3(px, markerY - 2.8, pz)
+          ];
+          const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+          const lineMat = new THREE.LineDashedMaterial({
+            color: isCrit ? 0xEF4444 : 0xF59E0B,
+            dashSize: 0.8,
+            gapSize: 0.5,
+            linewidth: 2
+          });
+          const tether = new THREE.Line(lineGeo, lineMat);
+          tether.computeLineDistances();
+          defectGroup.add(tether);
+
+          // 3. Pulsing Beacon Ring on the PCB Surface around Affected Component
+          const ringRadius = d.isBurn ? 12 : 5.5;
+          const ringGeo = new THREE.RingGeometry(ringRadius, ringRadius + 1.2, 32);
+          const ringMat = new THREE.MeshBasicMaterial({
+            color: isCrit ? 0xEF4444 : 0xF59E0B,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+          });
+          const ring = new THREE.Mesh(ringGeo, ringMat);
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.set(px, (boardThickness / 2) + 0.15, pz);
+          defectGroup.add(ring);
+
+          // Store for animation loop
+          activeDefectMarkers.push({
+            sprite,
+            ring,
+            baseY: markerY,
+            index: idx
+          });
+        });
+      }
 
       // --- Build 3D Board with True Image Texture & Elevation Mesh ---
-      async function build3DBoard(imageSrc, boardTitle, components, metrology) {
+      async function build3DBoard(imageSrc, boardTitle, components, metrology, boardId, inspectRes) {
         document.getElementById('hudScenarioTitle').textContent = boardTitle;
 
         // Remove old board mesh
@@ -310,11 +1040,6 @@
           texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
           texture.generateMipmaps = true;
 
-          if (texture.image && texture.image.width) {
-            imgWidth = texture.image.width;
-            imgHeight = texture.image.height;
-          }
-
           // 3D Substrate Box
           const substrateGeo = new THREE.BoxGeometry(boardWidth, boardThickness, boardLength);
           
@@ -334,32 +1059,82 @@
           pcbMesh.receiveShadow = true;
           scene.add(pcbMesh);
 
-          // Populate 3D Components & Defect Markers
-          populate3DComponents(components, metrology);
+          // Populate 3D Components
+          populate3DComponents(components, metrology, boardId, texture);
+
+          // Render 3D Defect Markers
+          render3DDefectMarkers(currentExtractedDefects, boardWidth, boardLength, boardThickness);
         });
       }
 
       // --- Populate 3D Component Models & Defect Bounding Boxes ---
-      function populate3DComponents(comps, metrologyList) {
+      function populate3DComponents(comps, metrologyList, boardId, texture) {
+        // If board is TB032 or thermal burn scenario, render physical substrate rupture crater
+        const isBurnScenario = (boardId === 'TB032') || (comps || []).some(c => (c.defect_type || '').toLowerCase().includes('burn'));
+        if (isBurnScenario) {
+          const burnHoleGeo = new THREE.CylinderGeometry(9.0, 7.0, boardThickness * 1.6, 32);
+          const burnHoleMat = new THREE.MeshStandardMaterial({
+            color: 0x050505,
+            roughness: 0.95,
+            metalness: 0.05,
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false
+          });
+          const burnHoleMesh = new THREE.Mesh(burnHoleGeo, burnHoleMat);
+          burnHoleMesh.position.set(0, 0, 0);
+          burnHoleMesh.userData = {
+            id: 'FR4_CRATER',
+            name: 'Catastrophic FR-4 Thermal Rupture & Carbonization',
+            status: 'DEFECT',
+            metro: {
+              delta_x_mm: 0.0,
+              delta_y_mm: 0.0,
+              rotation_deg: 0.0,
+              max_overhang_pct: 100.0,
+              ipc_class_verdict: 'IPC-A-610 Class 3 Section 10.2 Defect Violation (SCRAP)'
+            }
+          };
+          componentGroup.add(burnHoleMesh);
+          componentMeshes.push(burnHoleMesh);
+
+          // Glowing thermal rupture halo (subtle translucent warning ring)
+          const haloGeo = new THREE.RingGeometry(9.2, 14.5, 32);
+          const haloMat = new THREE.MeshBasicMaterial({
+            color: 0xef4444,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.30,
+            depthWrite: false
+          });
+          const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+          haloMesh.rotation.x = -Math.PI / 2;
+          haloMesh.position.set(0, boardThickness / 2 + 0.15, 0);
+          componentGroup.add(haloMesh);
+        }
+
         if (!comps || comps.length === 0) return;
 
+        const imgW = (texture && texture.image && texture.image.width) ? texture.image.width : 1024;
+        const imgH = (texture && texture.image && texture.image.height) ? texture.image.height : 1024;
+
         comps.forEach(comp => {
-          const [bx, by, bw, bh] = comp.bbox_xywh || [0, 0, 30, 30];
+          const [bx, by, bw, bh] = comp.bbox_px || comp.bbox_xywh || [0, 0, 30, 30];
           
-          // Map pixel image coordinates to 100x100 3D world space
-          const posX = ((bx + bw / 2) / imgWidth) * boardWidth - (boardWidth / 2);
-          const posZ = ((by + bh / 2) / imgHeight) * boardLength - (boardLength / 2);
-          const compW = (bw / imgWidth) * boardWidth;
-          const compL = (bh / imgHeight) * boardLength;
+          // Map image coordinates to 100x80 3D world space
+          const posX = ((bx + bw / 2) / imgW) * boardWidth - (boardWidth / 2);
+          const posZ = ((by + bh / 2) / imgH) * boardLength - (boardLength / 2);
+          const compW = (bw / imgW) * boardWidth;
+          const compL = (bh / imgH) * boardLength;
 
           const metro = (metrologyList || []).find(m => m.component_id === comp.id) || {};
           const isMissing = comp.is_missing;
           const isTombstone = comp.tombstone_flag;
           const isTilt = comp.tilt_flag || Math.abs(metro.rotation_deg || 0) > 3.0;
-          const isShift = Math.abs(metro.delta_x_mm || 0) > 0.3;
+          const isShift = (metro.max_overhang_pct || 0) > 25.0 || Math.abs(metro.delta_x_mm || 0) > 0.3;
 
           const rotAngleDeg = metro.rotation_deg || (comp.id === 'R12' && isTilt ? 18.5 : 0);
-          const shiftX = (metro.delta_x_px ? (metro.delta_x_px / imgWidth) * boardWidth : 0);
+          const shiftX = (metro.delta_x_px ? (metro.delta_x_px / imgW) * boardWidth : 0);
 
           let compH = 2.4;
           let compColor = 0x1e293b;
@@ -367,16 +1142,16 @@
 
           if (cType.includes('IC')) {
             compH = 3.5;
-            compColor = 0x0f172a;
+            compColor = 0x2563eb; // Translucent Technical Blue for ICs
           } else if (cType.includes('CAPACITOR')) {
             compH = 2.2;
             compColor = 0x9a3412; // Ceramic Orange/Tan
           } else if (cType.includes('RESISTOR')) {
             compH = 1.4;
-            compColor = 0x18181b;
+            compColor = 0x334155; // Slate Gray
           } else if (cType.includes('REGULATOR')) {
             compH = 4.2;
-            compColor = 0x334155;
+            compColor = 0x1d4ed8; // Translucent Deep Blue
           } else if (cType.includes('CONNECTOR')) {
             compH = 5.5;
             compColor = 0xd97706;
@@ -396,22 +1171,29 @@
 
           // 3D Extruded Component Mesh
           const geo = new THREE.BoxGeometry(compW, compH * (currentZScale / 2), compL);
+          const isDefect = isTombstone || isTilt || isShift;
           let boxColor = compColor;
           if (isTombstone) boxColor = 0xef4444;
           else if (isTilt || isShift) boxColor = 0xf59e0b;
 
+          // Targeted visual fix:
+          // Make component elevation and defect-region overlays subtle and semi-transparent
+          // - Normal components: subtle blue/slate elevation (opacity 0.20)
+          // - Defect regions (tilt/shift/tombstone): subtle amber/red highlight overlay (opacity 0.30)
+          // - depthWrite: false allows the real PCB texture, ICs, traces, and pads underneath to stay crisp and clearly visible
           const mat = new THREE.MeshStandardMaterial({
             color: boxColor,
-            roughness: 0.3,
-            metalness: 0.35,
+            roughness: 0.25,
+            metalness: 0.15,
             wireframe: isWireframe,
             transparent: true,
-            opacity: 0.88
+            opacity: isDefect ? 0.30 : 0.20,
+            depthWrite: false
           });
 
           const mesh = new THREE.Mesh(geo, mat);
-          mesh.castShadow = true;
-          mesh.receiveShadow = true;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
 
           let finalY = (boardThickness / 2) + (compH * (currentZScale / 2) / 2);
           mesh.position.set(posX + shiftX, finalY, posZ);
@@ -436,11 +1218,14 @@
           componentGroup.add(mesh);
           componentMeshes.push(mesh);
 
-          // Solder Fillet Pin Callouts
+          // Solder Fillet Pin Callouts (subtle wireframe overlay)
           const filletGeo = new THREE.BoxGeometry(compW * 1.05, 0.5, compL * 1.05);
           const filletMat = new THREE.MeshStandardMaterial({
             color: isTombstone ? 0xef4444 : (isShift || isTilt ? 0xf59e0b : 0x10b981),
-            wireframe: true
+            wireframe: true,
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false
           });
           const filletMesh = new THREE.Mesh(filletGeo, filletMat);
           filletMesh.position.set(posX, (boardThickness / 2) + 0.1, posZ);
@@ -448,159 +1233,226 @@
         });
       }
 
-      // --- Load Active Board or Scenario ---
-      async function loadScenario(boardId) {
+      // --- Load Active Board or Scenario (reused by initial load, dropdown change & sync) ---
+      async function loadScenario(boardId, updateGlobal = false, customImgUrl = null, cachedActive = null) {
+        if (!boardId) boardId = 'TB005';
+        boardId = String(boardId).trim().toUpperCase();
+        currentActiveBoardId = boardId;
+
         try {
-          const compResp = await fetch('/server/config/components.json');
-          if (compResp.ok) {
-            componentsData = await compResp.json();
+          const boardSelect = document.getElementById('boardSelect3D');
+          if (boardSelect && typeof syncDropdownToActiveBoard === 'function') {
+            syncDropdownToActiveBoard(boardSelect, boardId);
+          }
+          if (boardSelect && boardSelect.value !== boardId) {
+            boardSelect.value = boardId;
           }
 
-          // Run inspection on this board to get exact metrology
-          const imgResp = await fetch(`/evaluation/test_boards/${boardId}.png`);
-          if (!imgResp.ok) throw new Error(`Image not found (HTTP ${imgResp.status})`);
-          const imgBlob = await imgResp.blob();
-          const fd = new FormData();
-          fd.append("file", imgBlob, `${boardId}.png`);
-          fd.append("board_serial", boardId);
-          const inspResp = await fetch('/inspect', { method: 'POST', body: fd });
-          const res = inspResp.ok ? await inspResp.json() : {};
+          const compResp = await fetch('/server/config/components.json').then(r => r.json());
+          componentsData = compResp;
+
+          let targetImgUrl = customImgUrl;
+          if (!targetImgUrl) {
+            if (boardId.startsWith('TB')) {
+              targetImgUrl = `/evaluation/test_boards/${boardId}.png`;
+            } else {
+              targetImgUrl = '/server/reference/golden_board.png';
+            }
+          }
+
+          let res = (cachedActive && cachedActive.board_id === boardId && cachedActive.components && cachedActive.components.length > 0 && cachedActive.health_index !== undefined)
+            ? {
+                verdict: cachedActive.verdict,
+                health_index: cachedActive.health_index,
+                per_component_results: cachedActive.components,
+                metrology: cachedActive.metrology,
+                defective_components: cachedActive.defective_components
+              }
+            : null;
+
+          if (!res) {
+            let imgBlob;
+            try {
+              const resp = await fetch(targetImgUrl);
+              if (resp.ok) {
+                imgBlob = await resp.blob();
+              } else {
+                targetImgUrl = '/server/reference/golden_board.png';
+                imgBlob = await fetch(targetImgUrl).then(r => r.blob());
+              }
+            } catch (e) {
+              targetImgUrl = '/server/reference/golden_board.png';
+              imgBlob = await fetch(targetImgUrl).then(r => r.blob());
+            }
+
+            const fd = new FormData();
+            fd.append("file", imgBlob, `${boardId}.png`);
+            fd.append("board_serial", boardId);
+            res = await fetch('/inspect', { method: 'POST', body: fd }).then(r => r.json());
+          }
+
+          // Extract defects and update panels
+          const extracted = extractDefectsFromInspection(res, boardId);
+          currentExtractedDefects = extracted.defects;
+          updateDefectsAndHealthPanel(res, boardId, currentExtractedDefects);
+
+          const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[boardId]) || {};
+          const boardName = meta.name ? `${boardId} - ${meta.name}` : `${boardId} - 3D Digital Twin`;
 
           build3DBoard(
-            `/evaluation/test_boards/${boardId}.png`,
-            `${boardId} - 3D Digital Twin (${res.verdict || 'PASS'})`,
+            targetImgUrl,
+            `${boardName} (${res.verdict || 'PASS'})`,
             res.per_component_results || componentsData,
-            res.metrology || []
+            res.metrology || [],
+            boardId,
+            res
           );
+
+          if (updateGlobal && typeof setGlobalActiveBoard === 'function') {
+            await setGlobalActiveBoard({
+              board_id: boardId,
+              scenario_name: meta.name || boardName,
+              defect_type: meta.defect_type || (res.verdict === 'PASS' ? 'none' : 'Defect Detected'),
+              verdict: res.verdict || 'FAIL',
+              health_index: res.health_index,
+              defective_components: res.defective_components,
+              image_url: targetImgUrl,
+              components: res.per_component_results || [],
+              metrology: res.metrology || [],
+              measurements: res.measurements || {}
+            });
+          }
         } catch (e) {
           console.warn("Load scenario error:", e);
-          build3DBoard(`/evaluation/test_boards/${boardId}.png`, `${boardId} - 3D View`, componentsData, []);
+          build3DBoard('/server/reference/golden_board.png', `${boardId} - 3D View`, componentsData, [], boardId, {});
         }
       }
 
-      async function syncActiveBoard(boardInfo) {
-        if (!boardInfo) return;
-        const bId = boardInfo.board_id || boardInfo.serial || 'TB005';
-        const v = boardInfo.verdict || 'PASS';
-        
-        // Update dropdown if option exists
-        const select = document.getElementById('boardSelect3D');
-        if (select) {
-          let found = false;
-          for (let opt of select.options) {
-            if (opt.value === bId) {
-              select.value = bId;
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            let activeOpt = select.querySelector('option[data-active-custom="true"]');
-            if (!activeOpt) {
-              activeOpt = document.createElement('option');
-              activeOpt.setAttribute('data-active-custom', 'true');
-              select.insertBefore(activeOpt, select.firstChild);
-            }
-            activeOpt.value = bId;
-            activeOpt.textContent = `⚡ Live Active: ${bId} (${v})`;
-            select.value = bId;
-          }
-        }
-
-        const imgSrc = boardInfo.image_b64 ? `data:image/png;base64,${boardInfo.image_b64}` : (boardInfo.image_url || `/evaluation/test_boards/${bId}.png`);
-        build3DBoard(
-          imgSrc,
-          `${bId} - Active 3D Twin (${v})`,
-          boardInfo.components || [],
-          boardInfo.metrology || []
-        );
+      // Dropdown Scenario Change
+      const boardSelect = document.getElementById('boardSelect3D');
+      if (boardSelect) {
+        boardSelect.addEventListener('change', async (e) => {
+          tooltip.style.display = 'none';
+          await loadScenario(e.target.value, true);
+        });
       }
 
-      // Check if there is an active board from the inspection page
+      // Side panel collapse toggle
+      const panelToggleBtn = document.getElementById('twinPanelToggleBtn');
+      const sidePanel = document.getElementById('digitalTwinSidePanel');
+      if (panelToggleBtn && sidePanel) {
+        panelToggleBtn.addEventListener('click', () => {
+          sidePanel.classList.toggle('collapsed');
+        });
+      }
+
+      // Synchronize with Global Active Inspection Context on initial page load
       if (typeof getGlobalActiveBoard === 'function') {
         getGlobalActiveBoard().then(active => {
-          if (active && (active.board_id || active.serial)) {
-            syncActiveBoard(active);
-          } else {
-            loadScenario('TB005');
-          }
+          const targetId = (active && (active.board_id || active.serial)) || 'TB005';
+          const imgUrl = active && (active.image_url || active.image_path);
+          loadScenario(targetId, false, imgUrl, active);
+        }).catch(() => {
+          loadScenario('TB005', false);
         });
       } else {
-        loadScenario('TB005');
+        loadScenario('TB005', false);
       }
 
+      // React to live changes from other tabs or pages
       if (typeof onGlobalActiveBoardChange === 'function') {
-        onGlobalActiveBoardChange(syncActiveBoard);
+        onGlobalActiveBoardChange((active) => {
+          const targetId = active && (active.board_id || active.serial);
+          const imgUrl = active && (active.image_url || active.image_path);
+          if (targetId && targetId !== currentActiveBoardId) {
+            loadScenario(targetId, false, imgUrl, active);
+          }
+        });
       }
 
       // Custom Image Upload directly in 3D Viewer
       const customInput = document.getElementById('customImageUpload3D');
-      customInput.addEventListener('change', async (e) => {
-        if (!e.target.files.length) return;
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-          const imgSrc = ev.target.result;
-          // Inspect the custom image
-          const fd = new FormData();
-          fd.append("file", file);
-          fd.append("board_serial", file.name.replace(/\.\w+$/, '') || "CUSTOM");
-          try {
-            const res = await fetch('/inspect', { method: 'POST', body: fd }).then(r => r.json());
-            build3DBoard(imgSrc, `${file.name} - Custom Upload (${res.verdict})`, res.per_component_results || [], res.metrology || []);
-          } catch (err) {
-            build3DBoard(imgSrc, `${file.name} - Custom Upload`, componentsData, []);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+      if (customInput) {
+        customInput.addEventListener('change', async (e) => {
+          if (!e.target.files.length) return;
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          reader.onload = async (ev) => {
+            const imgSrc = ev.target.result;
+            const fd = new FormData();
+            fd.append("file", file);
+            const customSerial = file.name.replace(/\.\w+$/, '') || "CUSTOM";
+            fd.append("board_serial", customSerial);
+            try {
+              const res = await fetch('/inspect', { method: 'POST', body: fd }).then(r => r.json());
+              const extracted = extractDefectsFromInspection(res, customSerial);
+              currentExtractedDefects = extracted.defects;
+              updateDefectsAndHealthPanel(res, customSerial, currentExtractedDefects);
 
-      // Dropdown Scenario Change
-      const boardSelect = document.getElementById('boardSelect3D');
-      boardSelect.addEventListener('change', (e) => {
-        tooltip.style.display = 'none';
-        loadScenario(e.target.value);
-      });
+              build3DBoard(imgSrc, `${file.name} - Custom Upload (${res.verdict})`, res.per_component_results || [], res.metrology || [], customSerial, res);
+              if (typeof setGlobalActiveBoard === 'function') {
+                setGlobalActiveBoard({
+                  board_id: customSerial,
+                  scenario_name: file.name,
+                  defect_type: res.verdict === 'PASS' ? 'None' : 'Custom Inspection Defect',
+                  verdict: res.verdict || 'FAIL',
+                  health_index: res.health_index,
+                  defective_components: res.defective_components,
+                  image_path: imgSrc,
+                  components: res.per_component_results || [],
+                  metrology: res.metrology || []
+                });
+              }
+            } catch (err) {
+              build3DBoard(imgSrc, `${file.name} - Custom Upload`, componentsData, [], customSerial, {});
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
 
-      // Raycaster Click Handler for 3D Component Inspection
-      const tooltip = document.getElementById('componentTooltip3D');
+      // Raycaster Click Handler for 3D Component Inspection & Defect Markers
       window.addEventListener('click', (event) => {
         const rect = renderer.domElement.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
+          return;
+        }
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(componentMeshes);
 
+        // Check defect markers first
+        const markerIntersects = raycaster.intersectObjects(defectGroup.children, true);
+        if (markerIntersects.length > 0) {
+          const hitObj = markerIntersects[0].object;
+          if (hitObj.userData && hitObj.userData.defect) {
+            const d = hitObj.userData.defect;
+            document.querySelectorAll('.twin-defect-card').forEach(c => c.classList.remove('active-selected'));
+            const cardEl = document.getElementById(`defectCard_${d.componentId}`);
+            if (cardEl) {
+              cardEl.classList.add('active-selected');
+              cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            showComponentDetails(d.comp || { id: d.componentId, name: d.name, status: d.type }, d.metro || {});
+            return;
+          }
+        }
+
+        // Check components next
+        const intersects = raycaster.intersectObjects(componentMeshes);
         if (intersects.length > 0) {
           const hit = intersects[0].object.userData;
           if (hit && hit.id) {
             const m = hit.metro || {};
-            tooltip.style.display = 'block';
-            document.getElementById('tooltipCompId').textContent = hit.id;
-            document.getElementById('tooltipCompName').textContent = hit.name || 'Component';
-            document.getElementById('tooltipCompShift').textContent = `ΔX: ${(m.delta_x_mm || 0).toFixed(3)}mm, ΔY: ${(m.delta_y_mm || 0).toFixed(3)}mm`;
-            document.getElementById('tooltipCompRot').textContent = `Δθ: ${(m.rotation_deg || 0).toFixed(2)}°`;
-            document.getElementById('tooltipCompOverhang').textContent = `${(m.max_overhang_pct || 0).toFixed(1)}%`;
+            showComponentDetails(hit, m);
 
-            const badge = document.getElementById('tooltipCompBadge');
-            const ipcText = document.getElementById('tooltipCompIPC');
-
-            if (hit.status === 'PASS') {
-              badge.className = 'tag-badge tag-pass';
-              badge.textContent = 'PASS';
-              ipcText.textContent = m.ipc_class_verdict || 'IPC Class 3 Target (Pass)';
-              ipcText.style.color = '#34D399';
-            } else if (hit.status === 'REWORK') {
-              badge.className = 'tag-badge tag-rework';
-              badge.textContent = 'REWORK';
-              ipcText.textContent = m.ipc_class_verdict || 'IPC Class 2 Acceptable / Skew';
-              ipcText.style.color = '#FBBF24';
-            } else {
-              badge.className = 'tag-badge tag-fail';
-              badge.textContent = 'DEFECT';
-              ipcText.textContent = m.ipc_class_verdict || 'IPC-A-610 Defect Violation';
-              ipcText.style.color = '#F87171';
+            // Highlight corresponding defect card if defective
+            document.querySelectorAll('.twin-defect-card').forEach(c => c.classList.remove('active-selected'));
+            const cardEl = document.getElementById(`defectCard_${hit.id}`);
+            if (cardEl) {
+              cardEl.classList.add('active-selected');
+              cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
           }
         }
@@ -623,19 +1475,34 @@
       // Z-Scale Slider
       document.getElementById('zScaleSlider').addEventListener('input', (e) => {
         currentZScale = parseFloat(e.target.value);
-        if (boardSelect) loadScenario(boardSelect.value);
+        loadScenario(currentActiveBoardId);
       });
 
       // Wireframe Toggle
       document.getElementById('toggleWireframe').addEventListener('click', () => {
         isWireframe = !isWireframe;
-        if (boardSelect) loadScenario(boardSelect.value);
+        loadScenario(currentActiveBoardId);
       });
 
-      // Animation Loop
+      // Animation Loop with subtle marker bobbing
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
+
+        // Subtle animation for defect markers and rings
+        if (activeDefectMarkers && activeDefectMarkers.length > 0) {
+          const t = clock.getElapsedTime();
+          activeDefectMarkers.forEach(m => {
+            if (m.sprite) {
+              m.sprite.position.y = m.baseY + Math.sin(t * 3 + m.index) * 0.45;
+            }
+            if (m.ring) {
+              const pulse = 1.0 + Math.sin(t * 4 + m.index) * 0.08;
+              m.ring.scale.set(pulse, pulse, 1);
+            }
+          });
+        }
+
         renderer.render(scene, camera);
       }
       animate();

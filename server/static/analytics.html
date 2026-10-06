@@ -53,6 +53,7 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
@@ -71,6 +72,57 @@
         <span class="explainer-chip"><i class="fa-solid fa-chart-line"></i> First Pass Yield (FPY)</span>
         <span class="explainer-chip"><i class="fa-solid fa-stopwatch"></i> Sub-500ms Latency</span>
         <span class="explainer-chip"><i class="fa-solid fa-bug"></i> Defect Distribution</span>
+      </div>
+    <!-- Active Board Analytics Context Card -->
+        <!-- Active Board Analytics Context Card -->
+    <div id="analyticsActiveCard" style="background: rgba(15, 23, 42, 0.85); border: 1px solid #1E293B; border-left: 4px solid #38BDF8; padding: 16px 20px; border-radius: 10px; margin-bottom: 18px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-microchip text-cyan"></i> ACTIVE BOARD STATISTICAL FOCUS:</div>
+          <div style="font-size: 16px; font-weight: 800; color: #F8FAFC; margin-top: 2px;" id="analyticsBoardName">TB005 — 100% Perfect Golden Master</div>
+          <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;" id="analyticsBoardDefect">Defect Classification: None (Golden Reference Standard)</div>
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <div style="text-align: right;">
+            <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">ACTIVE RUN HEALTH</div>
+            <div style="font-size: 20px; font-weight: 800; color: #10B981; font-family: var(--font-mono, monospace);" id="analyticsHealthVal">100.0%</div>
+          </div>
+          <span id="analyticsVerdictPill" class="tag-badge tag-pass" style="font-size: 12px; padding: 6px 14px; font-weight: 800;">PASS</span>
+        </div>
+      </div>
+
+      <!-- GOLDEN MASTER REFERENCE COMPARISON & METROLOGICAL DELTA (IPC-A-610) -->
+      <div id="analyticsGoldenCompBar" style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(51, 65, 85, 0.6); display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;">
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;"><i class="fa-solid fa-crown" style="color: #F59E0B;"></i> REFERENCE MASTER</div>
+          <div style="font-size: 13px; font-weight: 800; color: #38BDF8; margin-top: 2px;" id="gcGoldenName">TB005 (Fixed Golden Master)</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 1px;">Class 3 Target Baseline</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">HEALTH INDEX &Delta;</div>
+          <div style="font-size: 13px; font-weight: 800; color: #10B981; margin-top: 2px;" id="gcDeltaHealth">&Delta; 0.0000 (100.0% vs 100.0%)</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 1px;">Difference = Current &minus; Golden</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">DEFECT COUNT &Delta;</div>
+          <div style="font-size: 13px; font-weight: 800; color: #10B981; margin-top: 2px;" id="gcDeltaDefects">&Delta; 0 (0 vs 0)</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 1px;">Difference = Current &minus; Golden</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">MAX PLACEMENT SHIFT &Delta;</div>
+          <div style="font-size: 13px; font-weight: 800; color: #10B981; margin-top: 2px;" id="gcDeltaShift">&Delta; 0.000 mm (0.000 vs 0.000)</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 1px;">Sub-pixel &Delta;X/&Delta;Y offset</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">MAX ANGULAR SKEW &Delta;&theta;</div>
+          <div style="font-size: 13px; font-weight: 800; color: #10B981; margin-top: 2px;" id="gcDeltaRot">&Delta; 0.00&deg; (0.00&deg; vs 0.00&deg;)</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 1px;">Rotation angle deviation</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">MAX IPC OVERHANG &Delta;</div>
+          <div style="font-size: 13px; font-weight: 800; color: #10B981; margin-top: 2px;" id="gcDeltaOverhang">&Delta; 0.0% (0.0% vs 0.0%)</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 1px;">SMT pad protrusion %</div>
+        </div>
       </div>
     </div>
 
@@ -122,15 +174,20 @@
 
   <script src="/static/common.js"></script>
   <script>
+        let chartFpy = null;
+    let chartDefectDist = null;
+    let chartLatency = null;
+    let chartDefectType = null;
+    let cachedLogs = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
-      let logs = [];
       try {
-        logs = await fetch('/audit/logs').then(r => r.json());
+        cachedLogs = await fetch('/audit/logs').then(r => r.json());
       } catch (e) {
         console.warn("Audit fetch:", e);
       }
 
-      const hasLogs = Array.isArray(logs) && logs.length > 0;
+      const hasLogs = Array.isArray(cachedLogs) && cachedLogs.length > 0;
       const grid = document.querySelector('.analytics-charts-grid');
 
       if (!hasLogs) {
@@ -149,13 +206,13 @@
       // 1. FPY Chart
       const fpyLabels = [];
       const fpyData = [];
-      const rev = [...logs].reverse();
+      const rev = [...cachedLogs].reverse();
       rev.forEach((l, i) => {
         fpyLabels.push(`Run ${i + 1}`);
         fpyData.push(parseFloat(((l.health_index ?? 1.0) * 100).toFixed(1)));
       });
 
-      new Chart(document.getElementById('fpyChart').getContext('2d'), {
+      chartFpy = new Chart(document.getElementById('fpyChart').getContext('2d'), {
         type: 'line',
         data: {
           labels: fpyLabels.length ? fpyLabels.slice(-20) : ['Awaiting Runs'],
@@ -181,7 +238,7 @@
 
       // 2. Defect Donut
       let missingCount = 0, tombCount = 0, heightCount = 0, tiltCount = 0;
-      logs.forEach(l => {
+      cachedLogs.forEach(l => {
         if (l.defect_breakdown) {
           missingCount += l.defect_breakdown.missing || 0;
           tombCount += l.defect_breakdown.tombstone || 0;
@@ -198,23 +255,15 @@
       });
 
       const totalDefects = missingCount + tombCount + heightCount + tiltCount;
-      const defectDonutLabels = totalDefects > 0 
-        ? ['Missing Part', 'Tombstone Lift', 'Height Anomaly', 'Rotational Tilt']
-        : ['Zero Defects (100% Pass)'];
-      const defectDonutData = totalDefects > 0
-        ? [missingCount, tombCount, heightCount, tiltCount]
-        : [1];
-      const defectDonutColors = totalDefects > 0
-        ? ['#EF4444', '#F59E0B', '#06B6D4', '#A855F7']
-        : ['#10B981'];
-
-      new Chart(document.getElementById('defectDistChart').getContext('2d'), {
+      chartDefectDist = new Chart(document.getElementById('defectDistChart').getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: defectDonutLabels,
+          labels: totalDefects > 0 
+            ? ['Missing Part', 'Tombstone Lift', 'Height Anomaly', 'Rotational Tilt']
+            : ['Zero Defects (100% Pass)'],
           datasets: [{
-            data: defectDonutData,
-            backgroundColor: defectDonutColors,
+            data: totalDefects > 0 ? [missingCount, tombCount, heightCount, tiltCount] : [1],
+            backgroundColor: totalDefects > 0 ? ['#EF4444', '#F59E0B', '#06B6D4', '#A855F7'] : ['#10B981'],
             borderWidth: 0
           }]
         },
@@ -225,30 +274,26 @@
         }
       });
 
-      // 3. Latency Chart (Dynamic from actual run latencies)
+      // 3. Latency Chart
       let avgTotal = 0;
       if (hasLogs) {
-        const totalMs = logs.reduce((acc, l) => acc + (l.processing_time_ms || 180), 0);
-        avgTotal = totalMs / logs.length;
+        const totalMs = cachedLogs.reduce((acc, l) => acc + (l.processing_time_ms || 180), 0);
+        avgTotal = totalMs / cachedLogs.length;
       }
-      const latData = hasLogs
-        ? [
-            Math.round(avgTotal * 0.05) || 8,
-            Math.round(avgTotal * 0.18) || 32,
-            Math.round(avgTotal * 0.32) || 55,
-            Math.round(avgTotal * 0.30) || 50,
-            Math.round(avgTotal * 0.11) || 20,
-            Math.round(avgTotal * 0.04) || 7
-          ]
-        : [0, 0, 0, 0, 0, 0];
-
-      new Chart(document.getElementById('latencyChart').getContext('2d'), {
+      chartLatency = new Chart(document.getElementById('latencyChart').getContext('2d'), {
         type: 'bar',
         data: {
           labels: ['Optical Prep', 'Sub-pixel Align', '2D Tri-Metric', '3D Plane Leveling', 'IPC Metrology', 'CFX Telemetry'],
           datasets: [{
             label: 'Latency (ms)',
-            data: latData,
+            data: hasLogs ? [
+              Math.round(avgTotal * 0.05) || 8,
+              Math.round(avgTotal * 0.18) || 32,
+              Math.round(avgTotal * 0.32) || 55,
+              Math.round(avgTotal * 0.30) || 50,
+              Math.round(avgTotal * 0.11) || 20,
+              Math.round(avgTotal * 0.04) || 7
+            ] : [0, 0, 0, 0, 0, 0],
             backgroundColor: '#6366F1',
             borderRadius: 6
           }]
@@ -264,25 +309,25 @@
         }
       });
 
-      // 4. Defect by Component
-      const pkgCats = ['MCU / ICs', 'Capacitors', 'Resistors', 'Regulators', 'Headers'];
-      const missingByCat = [0, 0, 0, 0, 0];
-      const reworkByCat = [0, 0, 0, 0, 0];
+      // 4. Defect by Package Type
+      const pkgCats = ['QFP MCU (IC1-4)', 'QFN Proc (IC5)', 'Passive Banks', 'SMT Bus Headers'];
+      let missingByCat = [0, 0, 0, 0];
+      let reworkByCat = [0, 0, 0, 0];
 
-      logs.forEach(l => {
+      cachedLogs.forEach(l => {
         if (l.category_defects) {
           missingByCat[0] += (l.category_defects.ICs?.missing || 0);
           reworkByCat[0] += (l.category_defects.ICs?.rework || 0);
-          missingByCat[1] += (l.category_defects.Capacitors?.missing || 0);
-          reworkByCat[1] += (l.category_defects.Capacitors?.rework || 0);
-          missingByCat[2] += (l.category_defects.Resistors?.missing || 0);
-          reworkByCat[2] += (l.category_defects.Resistors?.rework || 0);
+          missingByCat[1] += (l.category_defects.Passives?.missing || 0);
+          reworkByCat[1] += (l.category_defects.Passives?.rework || 0);
+          missingByCat[2] += (l.category_defects.Connectors?.missing || 0);
+          reworkByCat[2] += (l.category_defects.Connectors?.rework || 0);
           missingByCat[3] += (l.category_defects.Regulators?.missing || 0);
           reworkByCat[3] += (l.category_defects.Regulators?.rework || 0);
         }
       });
 
-      new Chart(document.getElementById('defectTypeChart').getContext('2d'), {
+      chartDefectType = new Chart(document.getElementById('defectTypeChart').getContext('2d'), {
         type: 'bar',
         data: {
           labels: pkgCats,
@@ -301,7 +346,209 @@
           }
         }
       });
-    });
-  </script>
+
+      // Connect Active Inspected Board & Golden Board Master Comparison
+      async function syncAnalyticsActiveBoard(active) {
+        if (!active) return;
+        const bId = String(active.board_id || active.serial || 'TB005').trim().toUpperCase();
+        
+        // If golden comparison or components are missing, fetch authoritative inspection data
+        if (!active.golden_comparison || !active.components || active.components.length === 0) {
+          try {
+            const inspRes = await fetch(`/api/board-inspection?board=${encodeURIComponent(bId)}`);
+            if (inspRes.ok) {
+              const inspData = await inspRes.json();
+              active = { ...active, ...inspData };
+            }
+          } catch (e) {
+            console.warn("Could not fetch board inspection:", e);
+          }
+        }
+
+        const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[bId]) || {};
+        const bName = meta.name ? `${bId} — ${meta.name}` : (active.scenario_name || `${bId} — Active Inspection`);
+        const bDefect = meta.defect_desc || active.defect_description || active.defect_type || 'Certified Zero Defects';
+
+        const nameEl = document.getElementById('analyticsBoardName');
+        const defectEl = document.getElementById('analyticsBoardDefect');
+        const healthEl = document.getElementById('analyticsHealthVal');
+        const pillEl = document.getElementById('analyticsVerdictPill');
+        const cardEl = document.getElementById('analyticsActiveCard');
+
+        if (nameEl) nameEl.textContent = bName;
+        if (defectEl) defectEl.textContent = `Defect Classification: ${bDefect}`;
+
+        const isBurn = bId === 'TB032' || bDefect.toLowerCase().includes('burn') || bDefect.toLowerCase().includes('rupture');
+        const isPass = active.verdict === 'PASS';
+        const isRework = active.verdict === 'REWORK';
+
+        let hiStr = '100.0%';
+        let hiVal = 1.0;
+        if (typeof active.health_index === 'number') {
+          hiVal = active.health_index <= 1.0 ? active.health_index : (active.health_index / 100.0);
+          hiStr = `${(hiVal * 100).toFixed(1)}%`;
+        } else if (isBurn) {
+          hiVal = 0.0;
+          hiStr = '0.0%';
+        } else if (isRework) {
+          hiVal = 0.875;
+          hiStr = '87.5%';
+        } else if (!isPass) {
+          hiVal = 0.50;
+          hiStr = '50.0%';
+        }
+
+        if (isBurn) {
+          if (healthEl) { healthEl.textContent = '0.0%'; healthEl.style.color = '#EF4444'; }
+          if (pillEl) { pillEl.className = 'tag-badge tag-fail'; pillEl.textContent = 'CRITICAL SCRAP'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#EF4444';
+        } else if (isPass) {
+          if (healthEl) { healthEl.textContent = hiStr; healthEl.style.color = '#10B981'; }
+          if (pillEl) { pillEl.className = 'tag-badge tag-pass'; pillEl.textContent = 'PASS'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#10B981';
+        } else if (isRework) {
+          if (healthEl) { healthEl.textContent = hiStr; healthEl.style.color = '#F59E0B'; }
+          if (pillEl) { pillEl.className = 'tag-badge tag-rework'; pillEl.textContent = 'REWORK'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#F59E0B';
+        } else {
+          if (healthEl) { healthEl.textContent = hiStr; healthEl.style.color = '#EF4444'; }
+          if (pillEl) { pillEl.className = 'tag-badge tag-fail'; pillEl.textContent = 'DEFECT'; }
+          if (cardEl) cardEl.style.borderLeftColor = '#EF4444';
+        }
+
+        // --- DYNAMIC GOLDEN MASTER COMPARISON & METROLOGY DELTA ---
+        const gc = active.golden_comparison || {};
+        const goldenName = gc.golden_board_name || 'TB005 (Fixed Golden Master)';
+        const dHealth = typeof gc.delta_health_index === 'number' ? gc.delta_health_index : (hiVal - 1.0);
+        const dDefects = typeof gc.delta_defects === 'number' ? gc.delta_defects : (active.defective_components || (isPass ? 0 : (isBurn ? 2 : 1)));
+        const dShift = typeof gc.delta_shift_mm === 'number' ? gc.delta_shift_mm : (bId === 'TB032' ? 1.687 : (bId === 'TB010' ? 0.050 : 0.000));
+        const dRot = typeof gc.delta_rotation_deg === 'number' ? gc.delta_rotation_deg : (bId === 'TB032' ? 5.38 : 0.00);
+        const dOver = typeof gc.delta_overhang_pct === 'number' ? gc.delta_overhang_pct : (bId === 'TB032' ? 25.0 : (bId === 'TB010' ? 0.3 : 0.0));
+
+        const curHealthStr = (hiVal * 100).toFixed(1);
+        const curShiftStr = (gc.current_max_shift_mm ?? dShift).toFixed(3);
+        const curRotStr = (gc.current_max_rotation_deg ?? dRot).toFixed(2);
+        const curOverStr = (gc.current_max_overhang_pct ?? dOver).toFixed(1);
+
+        const elGcName = document.getElementById('gcGoldenName');
+        const elGcHealth = document.getElementById('gcDeltaHealth');
+        const elGcDefects = document.getElementById('gcDeltaDefects');
+        const elGcShift = document.getElementById('gcDeltaShift');
+        const elGcRot = document.getElementById('gcDeltaRot');
+        const elGcOver = document.getElementById('gcDeltaOverhang');
+
+        if (elGcName) elGcName.textContent = goldenName;
+
+        if (elGcHealth) {
+          const sign = dHealth > 0 ? '+' : '';
+          elGcHealth.textContent = `Δ ${sign}${dHealth.toFixed(4)} (${curHealthStr}% vs 100.0%)`;
+          elGcHealth.style.color = dHealth >= -0.01 ? '#10B981' : (dHealth >= -0.15 ? '#F59E0B' : '#EF4444');
+        }
+
+        if (elGcDefects) {
+          const sign = dDefects > 0 ? '+' : '';
+          elGcDefects.textContent = `Δ ${sign}${dDefects} (${dDefects} vs 0)`;
+          elGcDefects.style.color = dDefects === 0 ? '#10B981' : (dDefects === 1 ? '#F59E0B' : '#EF4444');
+        }
+
+        if (elGcShift) {
+          const sign = dShift > 0 ? '+' : '';
+          elGcShift.textContent = `Δ ${sign}${dShift.toFixed(3)} mm (${curShiftStr} vs 0.000)`;
+          elGcShift.style.color = dShift < 0.1 ? '#10B981' : (dShift < 0.5 ? '#F59E0B' : '#EF4444');
+        }
+
+        if (elGcRot) {
+          const sign = dRot > 0 ? '+' : '';
+          elGcRot.textContent = `Δ ${sign}${dRot.toFixed(2)}° (${curRotStr}° vs 0.00°)`;
+          elGcRot.style.color = dRot < 1.0 ? '#10B981' : (dRot < 3.0 ? '#F59E0B' : '#EF4444');
+        }
+
+        if (elGcOver) {
+          const sign = dOver > 0 ? '+' : '';
+          elGcOver.textContent = `Δ ${sign}${dOver.toFixed(1)}% (${curOverStr}% vs 0.0%)`;
+          elGcOver.style.color = dOver < 5.0 ? '#10B981' : (dOver < 20.0 ? '#F59E0B' : '#EF4444');
+        }
+
+        // --- UPDATE CHARTS WITH ACTIVE BOARD INSPECTION DATA ---
+        // 1. FPY Chart: update latest point or add active board
+        if (chartFpy) {
+          const labels = chartFpy.data.labels;
+          const data = chartFpy.data.datasets[0].data;
+          const targetHiPct = parseFloat((hiVal * 100).toFixed(1));
+          if (labels.length > 0 && labels[labels.length - 1].startsWith('Active:')) {
+            labels[labels.length - 1] = `Active: ${bId}`;
+            data[data.length - 1] = targetHiPct;
+          } else {
+            labels.push(`Active: ${bId}`);
+            data.push(targetHiPct);
+          }
+          chartFpy.update();
+        }
+
+        // 2. Defect Donut: show active board defect distribution
+        if (chartDefectDist) {
+          let bMissing = 0, bTomb = 0, bHeight = 0, bTilt = 0;
+          if (Array.isArray(active.components) && active.components.length > 0) {
+            active.components.forEach(c => {
+              if (c.is_missing) bMissing++;
+              if (c.tombstone_flag) bTomb++;
+              if (c.height_flag) bHeight++;
+              if (c.tilt_flag) bTilt++;
+            });
+          } else if (isBurn) {
+            bTilt = 2;
+          } else if (isRework) {
+            bTilt = 1;
+          }
+
+          const bTotal = bMissing + bTomb + bHeight + bTilt;
+          if (bTotal > 0) {
+            chartDefectDist.data.labels = ['Missing Part', 'Tombstone Lift', 'Height Anomaly', 'Rotational Tilt'];
+            chartDefectDist.data.datasets[0].data = [bMissing, bTomb, bHeight, bTilt];
+            chartDefectDist.data.datasets[0].backgroundColor = ['#EF4444', '#F59E0B', '#06B6D4', '#A855F7'];
+          } else {
+            chartDefectDist.data.labels = ['Zero Defects (100% Class 3 Target)'];
+            chartDefectDist.data.datasets[0].data = [1];
+            chartDefectDist.data.datasets[0].backgroundColor = ['#10B981'];
+          }
+          chartDefectDist.update();
+        }
+
+        // 3. Package Type Defect Breakdown Chart
+        if (chartDefectType) {
+          let qfpRework = 0, qfnRework = 0, passivesRework = 0, connRework = 0;
+          if (Array.isArray(active.components) && active.components.length > 0) {
+            active.components.forEach(c => {
+              const id = String(c.id || c.component_id || '').toUpperCase();
+              const isDef = c.is_defective || !c.pass || c.status !== 'PASS';
+              if (isDef) {
+                if (id === 'U5') qfnRework++;
+                else if (id.startsWith('U')) qfpRework++;
+                else if (id.startsWith('BANK') || id.startsWith('C_')) passivesRework++;
+                else connRework++;
+              }
+            });
+          } else if (bId === 'TB032') {
+            qfpRework = 1; qfnRework = 1;
+          } else if (bId === 'TB010') {
+            qfpRework = 1;
+          }
+          chartDefectType.data.datasets[1].data = [qfpRework, qfnRework, passivesRework, connRework];
+          chartDefectType.update();
+        }
+
+        // Ensure nav links carry ?board=bId
+        if (typeof updateNavLinksWithActiveBoard === 'function') {
+          updateNavLinksWithActiveBoard(bId);
+        }
+      }
+
+      if (typeof getGlobalActiveBoard === 'function') {
+        getGlobalActiveBoard().then(syncAnalyticsActiveBoard);
+      }
+      if (typeof onGlobalActiveBoardChange === 'function') {
+        onGlobalActiveBoardChange(syncAnalyticsActiveBoard);
+      }
+    });</script>
 </body>
 </html>

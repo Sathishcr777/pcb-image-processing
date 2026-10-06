@@ -17,8 +17,8 @@ def main():
     print("==========================================================")
 
     # Step 1: Generate Synthetic PCB Boards (Golden + 31 Test Boards)
-    print("\n--- STEP 1: Generating Synthetic PCB Boards ---")
-    from scripts.generate_synthetic_boards import main as gen_boards
+    print("\n--- STEP 1: Generating Ground Truth PCB Boards & Radiographs ---")
+    from scripts.build_complete_test_boards import main as gen_boards
     gen_boards()
 
     # Step 2: Run Automated Evaluation Suite

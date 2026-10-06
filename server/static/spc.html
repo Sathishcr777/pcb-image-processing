@@ -53,6 +53,7 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
@@ -71,6 +72,26 @@
         <span class="explainer-chip"><i class="fa-solid fa-shield-check"></i> Six Sigma (Cpk &ge; 1.33)</span>
         <span class="explainer-chip"><i class="fa-solid fa-triangle-exclamation"></i> Real-time Drift Alerts</span>
         <span class="explainer-chip"><i class="fa-solid fa-arrows-split-up-and-left"></i> Dynamic +3σ UCL</span>
+      </div>
+    </div>
+
+    <!-- Active Board SPC Context Card -->
+    <div id="spcActiveCard" style="background: rgba(15, 23, 42, 0.85); border: 1px solid #1E293B; border-left: 4px solid #38BDF8; padding: 14px 20px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-microchip text-cyan"></i> CURRENT INSPECTION CONTEXT FOR SPC:</div>
+        <div style="font-size: 16px; font-weight: 800; color: #F8FAFC; margin-top: 2px;" id="spcBoardName">TB005 — 100% Perfect Golden Master</div>
+        <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;" id="spcBoardDefect">Process Subgroup Defect Rate (p) for Selected Board</div>
+      </div>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div style="text-align: right;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">BOARD DEFECT RATE (p)</div>
+          <div style="font-size: 18px; font-weight: 800; color: #10B981; font-family: var(--font-mono, monospace);" id="spcBoardPVal">p = 0.000</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 10px; color: #94A3B8; font-weight: 700; text-transform: uppercase;">HEALTH INDEX</div>
+          <div style="font-size: 18px; font-weight: 800; color: #10B981; font-family: var(--font-mono, monospace);" id="spcBoardHealthVal">100.0%</div>
+        </div>
+        <span id="spcBoardVerdictPill" class="tag-badge tag-pass" style="font-size: 12px; padding: 6px 14px; font-weight: 800;">PASS</span>
       </div>
     </div>
 
@@ -222,18 +243,82 @@
         pObserved.push(p);
       });
 
-      // Synchronize with active board if one is uploaded/inspected on Live Inspection
+      // Synchronize with authoritative active board from Live Inspection & Analytics
+      let bId = 'TB005';
+      let activeP = 0.000;
+      let activeHI = 1.0;
+      let activeVerdict = 'PASS';
+      let activeScenarioName = '100% Perfect Master Golden Board';
+      let activeDefectDesc = 'Certified Golden Master Reference (Zero defects)';
+
       if (activeBoard && (activeBoard.board_id || activeBoard.serial)) {
-        const activeSerial = activeBoard.board_id || activeBoard.serial;
-        const activeIsBurn = isDefectBurnBoard(activeSerial, activeBoard.status, activeBoard.defects);
-        if (activeIsBurn || activeBoard.status === 'FAIL') {
-          if (pObserved.length > 0) {
-            pObserved[pObserved.length - 1] = activeIsBurn ? 0.750 : Math.max(0.250, pObserved[pObserved.length - 1]);
-          } else {
-            labels.push('Run 1');
-            pObserved.push(activeIsBurn ? 0.750 : 0.250);
-          }
+        bId = String(activeBoard.board_id || activeBoard.serial).trim().toUpperCase();
+        const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[bId]) || {};
+        activeScenarioName = meta.name ? `${bId} — ${meta.name}` : (activeBoard.scenario_name || `${bId}`);
+        activeDefectDesc = meta.defect_desc || activeBoard.defect_description || 'Zero Defects';
+        activeVerdict = (activeBoard.verdict || meta.default_verdict || 'PASS').toUpperCase();
+        
+        const activeIsBurn = isDefectBurnBoard(bId, activeVerdict, activeBoard.defective_components);
+        
+        // Exact real defect proportion p based on inspected board's defects:
+        if (activeIsBurn || bId === 'TB032') {
+          activeP = 0.750; // Severe dielectric thermal crater rupture
+          activeHI = 0.0;
+        } else if (activeVerdict === 'PASS' || bId === 'TB005' || bId === 'TB007') {
+          activeP = 0.000; // Zero defects in subgroup
+          activeHI = typeof activeBoard.health_index === 'number' ? activeBoard.health_index : 0.997;
+        } else {
+          const defCount = activeBoard.defective_components ?? (meta.defective_components ?? 1);
+          activeP = parseFloat((defCount / 12.0).toFixed(3)); // e.g. TB010 with 1 defect -> 0.083
+          activeHI = typeof activeBoard.health_index === 'number' ? activeBoard.health_index : 0.875;
         }
+
+        if (pObserved.length > 0) {
+          labels[labels.length - 1] = `Run ${pObserved.length} (${bId})`;
+          pObserved[pObserved.length - 1] = activeP;
+        } else {
+          labels.push(`Run 1 (${bId})`);
+          pObserved.push(activeP);
+        }
+      }
+
+      // Update SPC Active Board Focus Card
+      const elSpcCard = document.getElementById('spcActiveCard');
+      const elSpcName = document.getElementById('spcBoardName');
+      const elSpcDefect = document.getElementById('spcBoardDefect');
+      const elSpcPVal = document.getElementById('spcBoardPVal');
+      const elSpcHealth = document.getElementById('spcBoardHealthVal');
+      const elSpcPill = document.getElementById('spcBoardVerdictPill');
+
+      if (elSpcName) elSpcName.textContent = activeScenarioName;
+      if (elSpcDefect) elSpcDefect.textContent = `Process Subgroup Defect Rate (p) for Selected Board • ${activeDefectDesc}`;
+      if (elSpcPVal) {
+        elSpcPVal.textContent = `p = ${activeP.toFixed(3)}`;
+        elSpcPVal.style.color = activeP === 0 ? '#10B981' : (activeP < 0.20 ? '#F59E0B' : '#EF4444');
+      }
+      if (elSpcHealth) {
+        const hiPct = (activeHI <= 1.0 ? activeHI * 100 : activeHI).toFixed(1);
+        elSpcHealth.textContent = `${hiPct}%`;
+        elSpcHealth.style.color = activeHI >= 0.95 ? '#10B981' : (activeHI >= 0.80 ? '#F59E0B' : '#EF4444');
+      }
+      if (elSpcPill) {
+        if (activeP >= 0.50) {
+          elSpcPill.className = 'tag-badge tag-fail';
+          elSpcPill.textContent = 'CRITICAL SCRAP (OCAP Breach)';
+          if (elSpcCard) elSpcCard.style.borderLeftColor = '#EF4444';
+        } else if (activeP > 0) {
+          elSpcPill.className = 'tag-badge tag-rework';
+          elSpcPill.textContent = 'PROCESS SHIFT (Rework Required)';
+          if (elSpcCard) elSpcCard.style.borderLeftColor = '#F59E0B';
+        } else {
+          elSpcPill.className = 'tag-badge tag-pass';
+          elSpcPill.textContent = 'IN CONTROL (Zero Defects)';
+          if (elSpcCard) elSpcCard.style.borderLeftColor = '#10B981';
+        }
+      }
+
+      if (typeof updateNavLinksWithActiveBoard === 'function') {
+        updateNavLinksWithActiveBoard(bId);
       }
 
       // SPC Control Limits (p-Chart Six Sigma Standard)

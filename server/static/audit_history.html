@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspection Audit History | PCB AI Suite</title>
+  <meta name="description" content="Session-level PCB inspection audit history. Review every board inspected during the current session with full traceability, Health Index, defect details, and downloadable per-board audit reports.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    /* Additive scoped styles only - base classes from styles.css */
+    .text-pass{color:#34D399!important}.text-fail{color:#F87171!important}.text-amber{color:#FBBF24!important}
+    .text-cyan{color:#38BDF8!important}.text-primary{color:#818CF8!important}.text-dim{color:#94A3B8!important}
+    .text-emerald{color:#34D399!important}.text-center{text-align:center}
+    .ah-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;margin-top:2px}
+    .ah-card{background:#111827;border:1px solid #334155;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);display:flex;flex-direction:column;transition:border-color .25s,box-shadow .25s,transform .2s;position:relative}
+    .ah-card:hover{border-color:#475569;box-shadow:0 6px 28px rgba(0,0,0,.55);transform:translateY(-2px)}
+    .ah-card.verdict-pass{border-left:4px solid #10B981}
+    .ah-card.verdict-fail{border-left:4px solid #EF4444}
+    .ah-card.verdict-rework{border-left:4px solid #F59E0B}
+    .ah-card-img-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#060913;overflow:hidden;flex-shrink:0}
+    .ah-card-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+    .ah-card:hover .ah-card-img-wrap img{transform:scale(1.03)}
+    .ah-img-verdict-badge{position:absolute;top:10px;right:10px;padding:4px 11px;border-radius:20px;font-size:.72rem;font-weight:800;font-family:var(--font-mono);letter-spacing:.06em;backdrop-filter:blur(8px);border:1px solid transparent}
+    .badge-pass{background:rgba(16,185,129,.25);color:#34D399;border-color:#10B981}
+    .badge-fail{background:rgba(239,68,68,.25);color:#F87171;border-color:#EF4444}
+    .badge-rework{background:rgba(245,158,11,.25);color:#FBBF24;border-color:#F59E0B}
+    .ah-entry-num{position:absolute;top:10px;left:10px;background:rgba(11,17,32,.85);border:1px solid rgba(255,255,255,.15);color:#94A3B8;font-family:var(--font-mono);font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;backdrop-filter:blur(6px)}
+    .ah-card-body{padding:16px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .ah-board-id{font-family:var(--font-heading);font-size:1.25rem;font-weight:800;color:#FFFFFF;letter-spacing:-.01em}
+    .ah-board-name{font-size:.78rem;color:#94A3B8;font-weight:500;line-height:1.3;margin-top:-4px}
+    .ah-hi-strip{display:flex;align-items:center;gap:10px}
+    .ah-hi-bar-bg{flex:1;height:7px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+    .ah-hi-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+    .hi-fill-pass{background:linear-gradient(90deg,#10B981,#34D399)}
+    .hi-fill-rework{background:linear-gradient(90deg,#F59E0B,#FBBF24)}
+    .hi-fill-fail{background:linear-gradient(90deg,#EF4444,#F87171)}
+    .ah-hi-value{font-family:var(--font-mono);font-size:.85rem;font-weight:800;min-width:42px;text-align:right}
+    .ah-quick-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .ah-stat-box{background:rgba(11,17,32,.75);border:1px solid #1E293B;border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:2px}
+    .ah-stat-label{font-size:.65rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.05em}
+    .ah-stat-val{font-family:var(--font-mono);font-size:1rem;font-weight:800;color:#FFFFFF}
+    .ah-defect-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(30,41,59,.8);border:1px solid rgba(255,255,255,.1);padding:5px 12px;border-radius:6px;font-size:.78rem;color:#CBD5E1;font-weight:600}
+    .ah-defect-chip.chip-none{border-color:rgba(16,185,129,.3);color:#34D399}
+    .ah-defect-chip.chip-defect{border-color:rgba(239,68,68,.3);color:#F87171}
+    .ah-timestamp-row{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#64748B;font-family:var(--font-mono)}
+    .ah-card-footer{padding:12px 18px;background:rgba(11,17,32,.7);border-top:1px solid #1E293B;display:flex;gap:8px;align-items:center}
+    .ah-empty-state{text-align:center;padding:70px 40px;color:#475569}
+    .ah-empty-state i{font-size:3rem;margin-bottom:18px;display:block;color:#334155}
+    .ah-empty-state h3{font-size:1.2rem;font-weight:700;color:#64748B;margin-bottom:10px}
+    .ah-empty-state p{font-size:.875rem;line-height:1.6;max-width:480px;margin:0 auto 22px}
+    .ah-detail-modal-content{background:#111827;border:1px solid #334155;border-radius:16px;width:95%;max-width:820px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.7)}
+    .ah-modal-img-strip{width:100%;height:200px;background:#060913;object-fit:cover;flex-shrink:0}
+    .ah-modal-body{padding:22px 26px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:18px}
+    .ah-dossier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+    .ah-dossier-item{background:rgba(11,17,32,.9);border:1px solid #1E293B;border-radius:10px;padding:12px 16px}
+    .ah-dossier-label{font-size:.68rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .ah-dossier-value{font-family:var(--font-mono);font-size:1.05rem;font-weight:800;color:#FFFFFF}
+    .ah-section-divider{font-size:.75rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:10px}
+    .ah-section-divider::after{content:'';flex:1;height:1px;background:#1E293B}
+    .ah-comp-mini-list{display:flex;flex-wrap:wrap;gap:6px}
+    .ah-comp-chip{padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:700;font-family:var(--font-mono)}
+    .ah-comp-chip.pass{background:rgba(16,185,129,.15);color:#34D399;border:1px solid rgba(16,185,129,.35)}
+    .ah-comp-chip.defect{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.35)}
+    .ah-comp-chip.rework{background:rgba(245,158,11,.15);color:#FBBF24;border:1px solid rgba(245,158,11,.35)}
+    .ah-golden-comp-table{width:100%;border-collapse:collapse;font-size:.83rem}
+    .ah-golden-comp-table th{background:#1E293B;color:#94A3B8;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;font-weight:700;text-align:left;border-bottom:1px solid #334155}
+    .ah-golden-comp-table td{padding:9px 12px;border-bottom:1px solid #1E293B;color:#E2E8F0}
+    .ah-golden-comp-table tr:hover td{background:rgba(255,255,255,.03)}
+    .ah-session-stats{display:flex;gap:14px;flex-wrap:wrap}
+    .ah-session-stat{display:inline-flex;align-items:center;gap:8px;background:rgba(11,17,32,.8);border:1px solid #1E293B;padding:7px 14px;border-radius:8px;font-size:.8rem}
+    .ah-session-stat .ss-val{font-family:var(--font-mono);font-weight:800;font-size:.95rem}
+    .ah-session-stat .ss-lbl{color:#64748B;font-weight:600}
+    @media (max-width: 640px) { .ah-cards-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <header class="ind-header">
+    <div class="header-left">
+      <div class="company-brand">
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i></div>
+        <div class="brand-meta">
+          <div class="brand-name">PCB AI Metrology &amp; AOI Station</div>
+          <div class="brand-sub">Enterprise IPC-A-610H Class 2/3 &amp; Industry 4.0 Platform</div>
+        </div>
+      </div>
+      <div class="standards-pills">
+        <span class="pill pill-standard"><i class="fa-solid fa-certificate"></i> IPC-A-610H</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-satellite-dish"></i> IPC-CFX-2591</span>
+        <span class="pill pill-standard"><i class="fa-solid fa-shield-check"></i> ISO 9001:2015</span>
+      </div>
+    </div>
+    <div class="telemetry-panel">
+      <div class="telem-item">
+        <div class="telem-dot active"></div>
+        <div class="telem-info">
+          <span class="telem-label">LINE STATUS</span>
+          <span class="telem-val text-pass" id="telemServer">SMT LINE 01 ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="ind-nav-menu">
+    <a href="/" class="nav-tab-btn"><i class="fa-solid fa-camera-retro"></i> Live Inspection</a>
+    <a href="/3d-view" class="nav-tab-btn"><i class="fa-solid fa-cube"></i> 360&#xb0; 3D Digital Twin</a>
+    <a href="/photometric-studio" class="nav-tab-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Photometric Studio</a>
+    <a href="/xray-studio" class="nav-tab-btn"><i class="fa-solid fa-radiation"></i> 3D X-Ray Studio</a>
+    <a href="/photometric" class="nav-tab-btn"><i class="fa-solid fa-layer-group"></i> Photometric Stereo</a>
+    <a href="/metrology" class="nav-tab-btn"><i class="fa-solid fa-ruler-combined"></i> IPC-A-610 Metrology</a>
+    <a href="/analytics" class="nav-tab-btn"><i class="fa-solid fa-chart-pie"></i> Statistical Analytics</a>
+    <a href="/spc" class="nav-tab-btn"><i class="fa-solid fa-chart-line"></i> SPC Control Charts</a>
+    <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&amp;R (MSA)</a>
+    <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
+    <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn active"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
+    <a href="/download-zip" class="nav-tab-btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#ffffff!important;font-weight:bold;border-color:#34d399;margin-left:auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
+  </nav>
+
+  <main class="ind-dashboard">
+
+    <div class="page-explainer-banner">
+      <div class="page-explainer-content">
+        <div class="page-explainer-title">
+          <i class="fa-solid fa-clock-rotate-left text-primary"></i> Inspection Audit History
+        </div>
+        <p class="page-explainer-desc">
+          Session-scoped board inspection audit log. Every board inspected via the Live Inspection page during this session is recorded here automatically, with full traceability: board image, Health Index, defect summary, IPC-A-610 verdict, golden-board comparison, and a per-board downloadable audit report.
+        </p>
+      </div>
+      <div class="page-explainer-chips">
+        <span class="explainer-chip"><i class="fa-solid fa-camera"></i> Per-Board Images</span>
+        <span class="explainer-chip"><i class="fa-solid fa-heart-pulse"></i> Health Index</span>
+        <span class="explainer-chip"><i class="fa-solid fa-file-arrow-down"></i> Downloadable Reports</span>
+      </div>
+    </div>
+
+    <!-- Session Summary Bar -->
+    <section class="audit-log-card" id="ahSessionBar" style="padding:16px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">
+          <i class="fa-solid fa-clock-rotate-left" style="color:#818CF8;"></i>&nbsp;CURRENT SESSION &middot; INSPECTION LOG
+        </div>
+        <div style="font-size:15px;font-weight:800;color:#F8FAFC;" id="ahSessionBoardContext">No boards inspected this session yet</div>
+      </div>
+      <div class="ah-session-stats" id="ahSessionStats">
+        <div class="ah-session-stat"><i class="fa-solid fa-layer-group" style="color:#818CF8;"></i><span class="ss-val" id="ahStatTotal" style="color:#FFFFFF;">0</span><span class="ss-lbl">Inspected</span></div>
+        <div class="ah-session-stat"><i class="fa-solid fa-circle-check" style="color:#34D399;"></i><span class="ss-val" id="ahStatPass" style="color:#34D399;">0</span><span class="ss-lbl">PASS</span></div>
+        <div class="ah-session-stat"><i class="fa-solid fa-circle-xmark" style="color:#F87171;"></i><span class="ss-val" id="ahStatFail" style="color:#F87171;">0</span><span class="ss-lbl">FAIL</span></div>
+        <div class="ah-session-stat"><i class="fa-solid fa-triangle-exclamation" style="color:#FBBF24;"></i><span class="ss-val" id="ahStatRework" style="color:#FBBF24;">0</span><span class="ss-lbl">REWORK</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button id="btnAHRefresh" class="btn-export"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        <button id="btnAHClearSession" class="btn-export" style="color:#F87171;border-color:rgba(239,68,68,.4);"><i class="fa-solid fa-trash-can"></i> Clear Session</button>
+      </div>
+    </section>
+
+    <!-- Audit Cards Section -->
+    <section class="audit-log-card" id="ahCardsSection" style="padding:20px 22px;">
+      <div class="audit-header" style="margin-bottom:18px;">
+        <div class="audit-title-group">
+          <h2><i class="fa-solid fa-list-check text-primary"></i> Session Inspection Records</h2>
+          <span class="audit-subtag" id="ahCardSubtitle">Boards appear here automatically after each inspection</span>
+        </div>
+        <div class="export-btn-group">
+          <button id="btnAHToggleSort" class="btn-export"><i class="fa-solid fa-arrow-down-1-9"></i> Chronological</button>
+          <button id="btnAHExportCSV" class="btn-export"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+          <button id="btnAHExportJSON" class="btn-export"><i class="fa-solid fa-file-code"></i> Export JSON</button>
+        </div>
+      </div>
+      <div class="ah-cards-grid" id="ahCardsGrid"></div>
+      <div class="ah-empty-state" id="ahEmptyState" style="display:none;">
+        <i class="fa-solid fa-inbox"></i>
+        <h3>No Inspections Recorded Yet</h3>
+        <p>Return to the <strong>Live Inspection</strong> page, select or upload a PCB board, and run an inspection. Every completed inspection will automatically appear here as an audit card.</p>
+        <a href="/" class="ind-btn btn-primary" style="display:inline-flex;text-decoration:none;margin:0 auto;"><i class="fa-solid fa-camera-retro"></i> Go to Live Inspection</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Audit Detail Modal -->
+  <div id="ahDetailModal" class="webcam-modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+    <div class="ah-detail-modal-content">
+      <div class="webcam-modal-header">
+        <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Board Audit Dossier</h3>
+        <button id="btnAHCloseModal" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <img id="ahModalImg" class="ah-modal-img-strip" src="/static/placeholder.png" alt="Board inspection image">
+      <div class="ah-modal-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:.72rem;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">BOARD IDENTIFICATION</div>
+            <div style="font-family:var(--font-heading);font-size:1.6rem;font-weight:800;color:#FFFFFF;" id="ahModalBoardId">&mdash;</div>
+            <div style="font-size:.83rem;color:#94A3B8;margin-top:2px;" id="ahModalBoardName">&mdash;</div>
+          </div>
+          <div><span id="ahModalVerdictBadge" class="tag-badge tag-pass" style="font-size:13px;padding:6px 16px;font-weight:800;">&mdash;</span></div>
+        </div>
+        <div>
+          <div class="ah-section-divider"><i class="fa-solid fa-heart-pulse"></i> Inspection Metrics</div>
+          <div class="ah-dossier-grid" style="margin-top:12px;" id="ahModalDossierGrid"></div>
+        </div>
+        <div>
+          <div class="ah-section-divider"><i class="fa-solid fa-triangle-exclamation"></i> Defect Information</div>
+          <div style="margin-top:10px;background:rgba(11,17,32,.8);border:1px solid #1E293B;border-radius:10px;padding:12px 16px;">
+            <div style="font-size:.75rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Defect Description</div>
+            <div style="font-size:.875rem;color:#CBD5E1;font-weight:500;line-height:1.5;" id="ahModalDefectDesc">&mdash;</div>
+          </div>
+        </div>
+        <div id="ahModalCompSection">
+          <div class="ah-section-divider"><i class="fa-solid fa-microchip"></i> Component Results</div>
+          <div class="ah-comp-mini-list" id="ahModalCompList" style="margin-top:10px;"></div>
+        </div>
+        <div id="ahModalGoldenSection">
+          <div class="ah-section-divider"><i class="fa-solid fa-star"></i> Golden Board Comparison (vs TB005)</div>
+          <div style="margin-top:10px;overflow-x:auto;">
+            <table class="ah-golden-comp-table">
+              <thead><tr><th>Metric</th><th>Golden TB005</th><th>This Board</th><th>Delta</th></tr></thead>
+              <tbody id="ahModalGoldenBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="font-size:.78rem;color:#475569;font-family:var(--font-mono);border-top:1px solid #1E293B;padding-top:12px;" id="ahModalTimestamp">&mdash;</div>
+      </div>
+      <div class="webcam-modal-footer">
+        <button id="btnAHModalDownload" class="ind-btn btn-secondary"><i class="fa-solid fa-file-arrow-down"></i> Download Audit Report</button>
+        <button id="btnAHCloseModalFooter" class="ind-btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ind-footer">
+    <div class="footer-content">
+      <div>PCB AI Metrology &amp; AOI Suite &copy; 2026 | Enterprise SMT Quality Control</div>
+      <div class="footer-links"><span>IPC-A-610H Class 2/3</span> &bull; <span>IPC-CFX-2591</span> &bull; <span>ISO 9001:2015</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/audit_history.js"></script>
+</body>
+</html>

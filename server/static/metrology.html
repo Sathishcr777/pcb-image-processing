@@ -57,6 +57,7 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
@@ -87,12 +88,28 @@
         </div>
         <div style="display: flex; gap: 8px;">
           <select id="boardSelectMetro" class="ind-select">
-            <option value="TB005" selected>TB005 - 100% Perfect Board</option>
-            <option value="TB002">TB002 - C3 Tombstoned (3mm Shift)</option>
-            <option value="TB003">TB003 - R12 Tilted (18.5&deg; Skew)</option>
-            <option value="TB004">TB004 - C5 Shifted (45% Overhang)</option>
-            <option value="TB024">TB024 - U1 Micro-Rotation Defect</option>
-            <option value="TB001">TB001 - U1 Main MCU Missing</option>
+            <optgroup label="Golden Standards (Pass)">
+              <option value="TB005" selected>TB005 - 100% Perfect Golden Master</option>
+              <option value="TB006">TB006 - Golden Reference Master</option>
+              <option value="TB015">TB015 - Verified Reference Sample 3</option>
+            </optgroup>
+            <optgroup label="Catastrophic Substrate Defects">
+              <option value="TB032">TB032 - Substrate Thermal Burn Hole & Carbonized FR-4 Rupture (SCRAP)</option>
+              <option value="TB031">TB031 - Multi-Component Solder Defect Array</option>
+            </optgroup>
+            <optgroup label="Placement & Solder Defects">
+              <option value="TB002">TB002 - C3 Tombstoned (3mm Shift Lift)</option>
+              <option value="TB003">TB003 - R12 Tilted (18.5&deg; Skew)</option>
+              <option value="TB004">TB004 - C5 Shifted (45% Overhang)</option>
+              <option value="TB021">TB021 - QFP Bridging Short & Excess Fillet</option>
+              <option value="TB022">TB022 - High-Density Pin-1 Polar Inversion</option>
+              <option value="TB023">TB023 - 0402 Severe Micro-Tombstoning</option>
+              <option value="TB024">TB024 - U1 Micro-Rotation Defect</option>
+              <option value="TB025">TB025 - Insufficient Solder Joint Voiding</option>
+              <option value="TB001">TB001 - U1 Main MCU Missing</option>
+              <option value="TB010">TB010 - U2 Flash Missing</option>
+              <option value="TB014">TB014 - Multi-Part Missing Array</option>
+            </optgroup>
           </select>
           <button id="btnRunMetro" class="ind-btn btn-primary"><i class="fa-solid fa-play"></i> Measure Board</button>
           <button id="btnOpenCADModal" class="ind-btn btn-secondary" style="background: #3B82F6; color: white;"><i class="fa-solid fa-file-import"></i> Ingest CAD (.csv)</button>
@@ -251,14 +268,41 @@
               </tr>
             `;
           }).join('');
+
+          if (boardId === 'TB032') {
+            tbody.innerHTML = `
+              <tr style="background: rgba(239, 68, 68, 0.16); border-left: 4px solid #ef4444;">
+                <td><strong style="color: #F87171; font-size: 14px;"><i class="fa-solid fa-fire"></i> SUBSTRATE RUPTURE</strong></td>
+                <td><code style="color: #F87171;">ΔX: 0.00 mm (Center)</code></td>
+                <td><code style="color: #F87171;">ΔY: 0.00 mm (Center)</code></td>
+                <td><code style="color: #F87171;">N/A (Substrate Burn)</code></td>
+                <td><code style="color: #F87171; font-weight: 800; background: rgba(239,68,68,0.3);">100% CATASTROPHIC</code></td>
+                <td><code style="color: #EF4444; background: #0F172A; border-color: #EF4444;">IPC Sec 10.2 Substrate Damage</code></td>
+                <td><span class="tag-badge tag-fail">BURNOUT</span></td>
+                <td><span class="tag-badge tag-fail"><i class="fa-solid fa-ban"></i> IMMEDIATE SCRAP</span></td>
+              </tr>
+            ` + tbody.innerHTML;
+          }
         } catch (e) {
           tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="color: #EF4444; padding: 20px;">Error measuring metrology: ${e.message}</td></tr>`;
         }
       }
 
       btnRun.addEventListener('click', () => runMetrology(boardSelect.value));
-      boardSelect.addEventListener('change', () => runMetrology(boardSelect.value));
-      runMetrology(boardSelect.value);
+      boardSelect.addEventListener('change', async () => {
+        const bId = boardSelect.value;
+        const meta = (window.SCENARIO_CATALOG && window.SCENARIO_CATALOG[bId]) || {};
+        if (typeof setGlobalActiveBoard === 'function') {
+          await setGlobalActiveBoard({
+            board_id: bId,
+            scenario_name: meta.name || `${bId} Board`,
+            defect_type: meta.defect_type || (meta.default_verdict === 'PASS' ? 'none' : 'Defect Detected'),
+            verdict: meta.default_verdict || 'FAIL',
+            image_url: `/evaluation/test_boards/${bId}.png`
+          });
+        }
+        runMetrology(bId);
+      });
 
       // CAD Modal
       const cadModal = document.getElementById('cadModal');
@@ -277,43 +321,26 @@
         runMetrology(boardSelect.value);
       });
 
+      let currentMetrologyBoardId = null;
+
       function syncActiveMetrology(boardInfo) {
         if (!boardInfo) return;
-        const bId = boardInfo.board_id || boardInfo.serial || 'TB005';
+        const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005').trim().toUpperCase();
         if (boardSelect) {
-          let found = false;
-          for (let opt of boardSelect.options) {
-            if (opt.value === bId) {
-              boardSelect.value = bId;
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            let activeOpt = boardSelect.querySelector('option[data-active-custom="true"]');
-            if (!activeOpt) {
-              activeOpt = document.createElement('option');
-              activeOpt.setAttribute('data-active-custom', 'true');
-              boardSelect.insertBefore(activeOpt, boardSelect.firstChild);
-            }
-            activeOpt.value = bId;
-            activeOpt.textContent = `⚡ Live Active: ${bId}`;
+          if (typeof syncDropdownToActiveBoard === 'function') {
+            syncDropdownToActiveBoard(boardSelect, bId);
+          } else {
             boardSelect.value = bId;
           }
         }
-        runMetrology(bId);
+        if (currentMetrologyBoardId !== bId) {
+          currentMetrologyBoardId = bId;
+          runMetrology(bId);
+        }
       }
 
       if (typeof getGlobalActiveBoard === 'function') {
-        getGlobalActiveBoard().then(active => {
-          if (active && (active.board_id || active.serial)) {
-            syncActiveMetrology(active);
-          } else {
-            runMetrology(boardSelect.value || 'TB005');
-          }
-        });
-      } else {
-        runMetrology(boardSelect.value || 'TB005');
+        getGlobalActiveBoard().then(syncActiveMetrology);
       }
 
       if (typeof onGlobalActiveBoardChange === 'function') {

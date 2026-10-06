@@ -167,6 +167,71 @@ code {
   border: 1px solid rgba(99, 102, 241, 0.4);
 }
 
+/* Global Active Board Header Badge */
+.active-board-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm, 6px);
+  margin-left: auto;
+  margin-right: 14px;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.15);
+  transition: all 0.25s ease;
+  z-index: 10;
+}
+.active-board-badge:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.3);
+}
+.active-board-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+.active-board-name {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #f8fafc;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 1px solid #334155;
+  padding-left: 10px;
+}
+.active-board-verdict-pill {
+  font-size: 0.675rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-family: var(--font-mono, monospace);
+}
+.active-board-verdict-pill.pass {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid #059669;
+}
+.active-board-verdict-pill.fail {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border: 1px solid #ef4444;
+}
+.active-board-verdict-pill.rework {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border: 1px solid #d97706;
+}
+
+
 .telemetry-panel {
   display: flex;
   align-items: center;

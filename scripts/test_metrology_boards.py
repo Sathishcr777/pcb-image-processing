@@ -22,10 +22,15 @@ def test_boards():
         aligned, q, _, _ = aligner.align(test_img, ref_img)
         print(f"\n==================== BOARD: {board_id} ====================")
         
+        ref_h, ref_w = ref_img.shape[:2]
         for comp in comps:
             x, y, w, h = comp["bbox_xywh"]
-            rt = aligned[y:y+h, x:x+w]
-            rr = ref_img[y:y+h, x:x+w]
+            x1, y1 = max(0, min(x, ref_w - 1)), max(0, min(y, ref_h - 1))
+            x2, y2 = max(x1 + 1, min(ref_w, x + w)), max(y1 + 1, min(ref_h, y + h))
+            rt = aligned[y1:y2, x1:x2]
+            rr = ref_img[y1:y2, x1:x2]
+            if rt.shape != rr.shape:
+                rt = cv2.resize(rt, (rr.shape[1], rr.shape[0]))
             m = engine.inspect_component_metrology(rt, rr, comp)
             
             print(f"[{comp['id']}] dx={m['delta_x_mm']:+.3f}mm ({m['delta_x_px']:+.1f}px) | dy={m['delta_y_mm']:+.3f}mm ({m['delta_y_px']:+.1f}px) | rot={m['rotation_deg']:+.1f}deg | ovh={m['max_overhang_pct']:.1f}% | verdict={m['ipc_class_verdict']} | polarity={m['polarity_status']}")

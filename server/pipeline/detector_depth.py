@@ -80,6 +80,9 @@ class DetectorDepth:
         Levels both depth maps relative to the PCB substrate and calculates height/tilt/tombstone flags.
         Returns: (results_dict, substrate_leveling_stats)
         """
+        if test_depth.shape != ref_depth.shape:
+            test_depth = cv2.resize(test_depth, (ref_depth.shape[1], ref_depth.shape[0]))
+
         # 1. Level Depth Maps against Board Substrate
         test_leveled, _, test_stats = self.leveler.level_depth_map(test_depth, components)
         ref_leveled, _, ref_stats = self.leveler.level_depth_map(ref_depth, components)
@@ -94,11 +97,14 @@ class DetectorDepth:
             check_tomb = comp.get("tombstone_check", True)
 
             img_h, img_w = test_leveled.shape
-            x1, y1 = max(0, x), max(0, y)
-            x2, y2 = min(img_w, x + w), min(img_h, y + h)
+            x1, y1 = max(0, min(x, img_w - 1)), max(0, min(y, img_h - 1))
+            x2, y2 = max(x1 + 1, min(img_w, x + w)), max(y1 + 1, min(img_h, y + h))
 
             roi_test_depth = test_leveled[y1:y2, x1:x2]
             roi_ref_depth = ref_leveled[y1:y2, x1:x2]
+
+            if roi_test_depth.shape != roi_ref_depth.shape:
+                roi_test_depth = cv2.resize(roi_test_depth, (roi_ref_depth.shape[1], roi_ref_depth.shape[0]))
 
             if roi_test_depth.shape[0] < 3 or roi_test_depth.shape[1] < 3 or roi_ref_depth.shape[0] < 3 or roi_ref_depth.shape[1] < 3:
                 results[cid] = {

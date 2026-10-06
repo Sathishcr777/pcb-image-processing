@@ -377,6 +377,7 @@
     <a href="/msa" class="nav-tab-btn"><i class="fa-solid fa-flask"></i> Gage R&R (MSA)</a>
     <a href="/cfx" class="nav-tab-btn"><i class="fa-solid fa-satellite-dish"></i> Industry 4.0 CFX</a>
     <a href="/audit" class="nav-tab-btn"><i class="fa-solid fa-file-shield"></i> ISO 9001 Audit</a>
+    <a href="/audit-history" class="nav-tab-btn"><i class="fa-solid fa-clock-rotate-left"></i> Inspection Audit</a>
     <a href="/download-zip" class="nav-tab-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; font-weight: bold; border-color: #34d399; margin-left: auto;" download><i class="fa-solid fa-file-zipper"></i> Download Suite (.ZIP)</a>
   </nav>
 
@@ -589,6 +590,21 @@
 
     // Comprehensive Defect Knowledgebase by Board Scenario
     const DEFECT_DATABASE = {
+      "TB032": [
+        {
+          id: "Substrate Thermal Burn",
+          title: "Substrate Thermal Burn Hole & Carbonized FR-4 Rupture",
+          component: "Power Stage High-Current Substrate",
+          violation: "Catastrophic FR-4 dielectric burn through hole & carbonization",
+          standard: "IPC-A-610 Class 3 Section 10.2 (Substrate Damage)",
+          depth: "Z = Complete Substrate Penetration (1.6mm)",
+          action: "IMMEDIATE SCRAP — Board is structurally and electrically non-reworkable.",
+          x: 0.0,
+          z: 0.0,
+          color: 0xef4444,
+          icon: "fa-fire"
+        }
+      ],
       "TB010": [
         {
           id: "U5 BGA Voiding",
@@ -843,7 +859,18 @@
       animate();
     }
 
-    function loadInitialBoard() {
+    async function loadInitialBoard() {
+      if (typeof getGlobalActiveBoard === 'function') {
+        try {
+          const active = await getGlobalActiveBoard();
+          if (active && (active.board_id || active.serial)) {
+            await syncActiveBoard(active);
+            return;
+          }
+        } catch (e) {
+          console.warn("Global active board init error:", e);
+        }
+      }
       buildBoardScene();
     }
 
@@ -1157,19 +1184,15 @@
     }
 
     async function handleBoardSelection(boardId) {
-      if (boardId === "ACTIVE_LIVE") {
-        if (typeof getGlobalActiveBoard === 'function') {
-          const active = await getGlobalActiveBoard();
-          if (active) {
-            syncActiveBoard(active);
-            return;
-          }
-        }
-      }
-
+      boardId = String(boardId || 'TB005').trim().toUpperCase();
+      activeBoardId = boardId;
       customModeDataUrls = null;
       activeCustomImageSrc = null;
-      activeBoardId = boardId;
+
+      if (typeof setGlobalActiveBoard === 'function') {
+        await setGlobalActiveBoard({ board_id: boardId, serial: boardId });
+      }
+
       buildBoardScene();
 
       const defects = DEFECT_DATABASE[boardId] || [];
@@ -1182,19 +1205,13 @@
 
     async function syncActiveBoard(boardInfo) {
       if (!boardInfo) return;
-      const bId = boardInfo.board_id || boardInfo.serial || 'TB005';
+      const bId = String(boardInfo.board_id || boardInfo.serial || 'TB005').trim().toUpperCase();
       const select = document.getElementById("boardScenarioSelect");
       if (select) {
-        let found = false;
-        for (let opt of select.options) {
-          if (opt.value === bId) {
-            select.value = bId;
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          select.value = "ACTIVE_LIVE";
+        if (typeof syncDropdownToActiveBoard === 'function') {
+          syncDropdownToActiveBoard(select, bId);
+        } else {
+          select.value = bId;
         }
       }
 

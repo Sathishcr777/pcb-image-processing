@@ -64,6 +64,9 @@ class Detector2D:
         Evaluates each component ROI using the Tri-Metric Ensemble:
         Ensemble Score = 0.50 * SSIM + 0.30 * NCC + 0.20 * (1.0 - EdgeDiffRatio)
         """
+        if aligned_img.shape[:2] != ref_img.shape[:2]:
+            aligned_img = cv2.resize(aligned_img, (ref_img.shape[1], ref_img.shape[0]))
+
         proc_aligned = self.preprocess_roi_lab(aligned_img)
         proc_ref = self.preprocess_roi_lab(ref_img)
 
@@ -78,13 +81,18 @@ class Detector2D:
             x, y, w, h = comp["bbox_xywh"]
 
             img_h, img_w = proc_aligned.shape
-            x1, y1 = max(0, x), max(0, y)
-            x2, y2 = min(img_w, x + w), min(img_h, y + h)
+            x1, y1 = max(0, min(x, img_w - 1)), max(0, min(y, img_h - 1))
+            x2, y2 = max(x1 + 1, min(img_w, x + w)), max(y1 + 1, min(img_h, y + h))
 
             roi_test = proc_aligned[y1:y2, x1:x2]
             roi_ref = proc_ref[y1:y2, x1:x2]
             roi_edge_test = edges_aligned[y1:y2, x1:x2]
             roi_edge_ref = edges_ref[y1:y2, x1:x2]
+
+            if roi_test.shape != roi_ref.shape:
+                roi_test = cv2.resize(roi_test, (roi_ref.shape[1], roi_ref.shape[0]))
+            if roi_edge_test.shape != roi_edge_ref.shape:
+                roi_edge_test = cv2.resize(roi_edge_test, (roi_edge_ref.shape[1], roi_edge_ref.shape[0]))
 
             if roi_test.shape[0] < 7 or roi_test.shape[1] < 7 or roi_ref.shape[0] < 7 or roi_ref.shape[1] < 7:
                 results[cid] = {
