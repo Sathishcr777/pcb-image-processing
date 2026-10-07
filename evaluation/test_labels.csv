@@ -37,4 +37,13 @@ TB030,NONE,none,framing_drift=dx-6_dy5,Sudhir;Kiruthiga2,2026-07-30
 TB031,U1,missing,N/A,Sudhir;Kiruthiga2,2026-07-30
 TB031,U4,missing,N/A,Sudhir;Kiruthiga2,2026-07-30
 TB032,ALL,severe_thermal_burn,rupture_and_charring,Team4,2026-09-24
+TB033,NONE,none,N/A,Team4;QA,2026-10-06
+TB034,U4,tilt,angle=16.5deg,Team4;QA,2026-10-06
+TB035,U3,missing,unpopulated_pads,Team4;QA,2026-10-06
+TB036,U2,solder_bridge,bridge_span=0.85mm,Team4;QA,2026-10-06
+TB037,J_TOP,open_circuit,open_gap=1.2mm,Team4;QA,2026-10-06
+TB038,U5,shift,offset=1.6mm,Team4;QA,2026-10-06
+TB038,C_R1,tombstone,height_asymmetry=2.9mm,Team4;QA,2026-10-06
+TB039,BANK_L1,surface_scratch,gouge_len=14.5mm,Team4;QA,2026-10-06
+TB040,J_BOT2,severe_thermal_burn,carbonized_area=185mm2,Team4;QA,2026-10-06
 

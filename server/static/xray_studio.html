@@ -420,6 +420,16 @@
             <option value="TB031">TB031 - Complex Multi-Defect Matrix (FAIL)</option>
             <option value="TB032">TB032 - Severe Substrate Burn & Thermal Hole Rupture (FAIL)</option>
           </optgroup>
+          <optgroup label="🏭 Production Line Scenarios (TB033 - TB040)">
+            <option value="TB033">TB033 - In-Line Conforming Production Batch (PASS)</option>
+            <option value="TB034">TB034 - U4 MCU Angular Skew (REWORK)</option>
+            <option value="TB035">TB035 - U3 Controller Missing Component (FAIL)</option>
+            <option value="TB036">TB036 - U2 QFP Solder Bridge Short (FAIL)</option>
+            <option value="TB037">TB037 - J_TOP Contact Open & Broken Trace (FAIL)</option>
+            <option value="TB038">TB038 - Multi-Defect (U5 Shift + C_R1 Tombstone) (FAIL)</option>
+            <option value="TB039">TB039 - BANK_L1 Substrate Scratch & Gouge (FAIL)</option>
+            <option value="TB040">TB040 - J_BOT2 Power Bus Thermal Charring (SCRAP)</option>
+          </optgroup>
         </select>
 
         <label class="top-mode-btn" style="padding: 6px 12px; cursor: pointer; background: #2563eb; color: #ffffff; border-color: #3b82f6;">
@@ -801,6 +811,124 @@
           action: "Scrap assembly. Investigate power stage overcurrent event.",
           x: 0.0,
           z: -4.0,
+          color: 0xef4444,
+          icon: "fa-fire"
+        }
+      ],
+      "TB034": [
+        {
+          id: "U4 Rotational Skew",
+          title: "QFP Angular Alignment Defect (16.5°)",
+          component: "U4 Bottom-Right MCU",
+          violation: "16.5° Skew Exceeding IPC Class 3 Rotational Tolerance",
+          standard: "IPC-A-610 Class 3 Section 8.3",
+          depth: "Z = 120 µm",
+          action: "Hot air rework re-alignment and solder touch-up.",
+          x: 28.0,
+          z: 22.0,
+          color: 0xf59e0b,
+          icon: "fa-arrows-rotate"
+        }
+      ],
+      "TB035": [
+        {
+          id: "U3 Missing Footprint",
+          title: "Missing QFP Controller IC",
+          component: "U3 Mid-Lower Controller",
+          violation: "Unpopulated component pads with un-wetted solder",
+          standard: "IPC-A-610 Class 3 Section 8.3",
+          depth: "Z = Surface",
+          action: "SMT placement & selective soldering required.",
+          x: 12.0,
+          z: -6.0,
+          color: 0xef4444,
+          icon: "fa-ban"
+        }
+      ],
+      "TB036": [
+        {
+          id: "U2 Solder Bridge",
+          title: "Solder Bridging Short across Leads",
+          component: "U2 Controller Left Pin Array",
+          violation: "Intersoldered Lead Bridge Violation (0.85mm span)",
+          standard: "IPC-A-610 Class 3 Section 8.3.5.7",
+          depth: "Z = 85 µm",
+          action: "Flux micro-wicking and de-bridging required.",
+          x: 10.0,
+          z: -26.0,
+          color: 0xef4444,
+          icon: "fa-bolt"
+        }
+      ],
+      "TB037": [
+        {
+          id: "J_TOP Open Joint",
+          title: "Solder Joint Open & Trace Discontinuity",
+          component: "J_TOP Bus Header Array",
+          violation: "Non-wetted lead and broken circuit trace (1.2mm gap)",
+          standard: "IPC-A-610 Class 3 Section 8.3.5.2",
+          depth: "Z = 45 µm",
+          action: "Substrate micro-jumper repair and lead re-soldering.",
+          x: -24.0,
+          z: -38.0,
+          color: 0xef4444,
+          icon: "fa-scissors"
+        }
+      ],
+      "TB038": [
+        {
+          id: "U5 Placement Shift",
+          title: "QFN Translational Placement Shift",
+          component: "U5 Center Core Processor",
+          violation: "1.6mm Lateral Translation Off-Pad",
+          standard: "IPC-A-610 Class 3 Section 8.3",
+          depth: "Z = 95 µm",
+          action: "Desolder, re-ball, and re-place U5 QFN.",
+          x: -16.0,
+          z: -6.0,
+          color: 0xef4444,
+          icon: "fa-arrows-left-right"
+        },
+        {
+          id: "C_R1 Tombstone",
+          title: "0805 Capacitor 45° Tombstone Lift",
+          component: "C_R1 Passive Capacitor Bank",
+          violation: "Single-pad lift off substrate (2.9mm height asymmetry)",
+          standard: "IPC-A-610 Class 3 Section 8.3.5",
+          depth: "Z = 290 µm",
+          action: "De-solder, re-apply solder paste, and re-flow.",
+          x: 42.0,
+          z: -20.0,
+          color: 0xf59e0b,
+          icon: "fa-triangle-exclamation"
+        }
+      ],
+      "TB039": [
+        {
+          id: "Substrate Gouge",
+          title: "Solder Mask Abrasion & Trace Exposure",
+          component: "BANK_L1 Passive Matrix",
+          violation: "Physical scratch cutting protective dielectric (14.5mm)",
+          standard: "IPC-A-610 Class 3 Section 10.2",
+          depth: "Z = 60 µm",
+          action: "Conformal coating re-application or engineering review.",
+          x: -36.0,
+          z: -14.0,
+          color: 0xf59e0b,
+          icon: "fa-road-barrier"
+        }
+      ],
+      "TB040": [
+        {
+          id: "J_BOT2 Thermal Charring",
+          title: "Thermal Overcurrent Charring & Rupture",
+          component: "J_BOT2 Power Stage Bus Header",
+          violation: "Substrate dielectric carbonization (185mm² crater)",
+          standard: "IPC-A-610 Section 10.2 Scrap Violation",
+          depth: "Z = 850 µm Subsurface Charring",
+          action: "NON-REWORKABLE SCRAP.",
+          x: 18.0,
+          z: 36.0,
           color: 0xef4444,
           icon: "fa-fire"
         }

@@ -356,8 +356,97 @@ const SCENARIO_CATALOG = {
     solder_applicable: false, // Critical: Not a solder joint defect!
     xray_applicable: true,
     photometric_sample: "ps_sample_burn"
+  },
+  "TB033": {
+    id: "TB033",
+    name: "Production In-Line Conforming Batch (PASS)",
+    defect_type: "none",
+    defect_desc: "Production run verification sample (100% IPC Class 3 Target)",
+    component: "All 12 Components",
+    default_verdict: "PASS",
+    solder_applicable: true,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_optimal"
+  },
+  "TB034": {
+    id: "TB034",
+    name: "Bottom-Right MCU (U4) Angular Tilt (16.5°)",
+    defect_type: "tilt",
+    defect_desc: "16.5° rotational skew exceeding footprint tolerance",
+    component: "U4 (Bottom-Right MCU)",
+    default_verdict: "REWORK",
+    solder_applicable: true,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_excess"
+  },
+  "TB035": {
+    id: "TB035",
+    name: "Mid-Lower Controller (U3) Missing",
+    defect_type: "missing",
+    defect_desc: "Unpopulated footprint pads with un-wetted solder",
+    component: "U3 (Controller)",
+    default_verdict: "FAIL",
+    solder_applicable: true,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_insufficient"
+  },
+  "TB036": {
+    id: "TB036",
+    name: "Mid-Upper Controller (U2) Solder Bridge Short",
+    defect_type: "solder_bridge",
+    defect_desc: "Unwanted tin-lead bridging short across adjacent QFP leads (0.85mm span)",
+    component: "U2 (Controller)",
+    default_verdict: "FAIL",
+    solder_applicable: true,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_excess"
+  },
+  "TB037": {
+    id: "TB037",
+    name: "Top Bus Header (J_TOP) Contact Open / Broken Trace",
+    defect_type: "open_circuit",
+    defect_desc: "Discontinuous solder joint contact with broken circuit trace gap (1.2mm)",
+    component: "J_TOP (Header)",
+    default_verdict: "FAIL",
+    solder_applicable: true,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_insufficient"
+  },
+  "TB038": {
+    id: "TB038",
+    name: "Multi-Defect Assembly (U5 Shift + C_R1 Tombstone)",
+    defect_type: "multi_defect",
+    defect_desc: "Dual-defect assembly: U5 placement shift (1.6mm) and C_R1 45° tombstone lift",
+    component: "U5, C_R1",
+    default_verdict: "FAIL",
+    solder_applicable: true,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_tombstone"
+  },
+  "TB039": {
+    id: "TB039",
+    name: "Left Passives (BANK_L1) Substrate Scratch & Gouge",
+    defect_type: "surface_scratch",
+    defect_desc: "Mechanical abrasion gouge cutting solder mask and exposing bare copper (14.5mm)",
+    component: "BANK_L1 (Passives)",
+    default_verdict: "FAIL",
+    solder_applicable: false,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_optimal"
+  },
+  "TB040": {
+    id: "TB040",
+    name: "Power Bus (J_BOT2) Thermal Charring & Delamination",
+    defect_type: "severe_thermal_burn",
+    defect_desc: "Overcurrent thermal charring crater and dielectric delamination (IPC-A-610 Scrap)",
+    component: "J_BOT2 (Power Bus)",
+    default_verdict: "FAIL",
+    solder_applicable: false,
+    xray_applicable: true,
+    photometric_sample: "ps_sample_burn"
   }
 };
+
 
 function getScenarioCatalogEntry(boardId) {
   if (!boardId) return SCENARIO_CATALOG["TB005"];
