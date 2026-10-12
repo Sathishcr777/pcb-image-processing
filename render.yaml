@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: pcb-photometric-aoi-suite
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: PCB_AOI_ENV
+        value: production
+      - key: PCB_AOI_REQUIRE_API_KEY
+        value: "0"
+      - key: PCB_AOI_USE_DEPTH_MODEL
+        value: "0"
+      - key: LOG_LEVEL
+        value: INFO

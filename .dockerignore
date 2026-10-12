@@ -1,0 +1,33 @@
+# Version control
+.git
+.gitignore
+
+# Python cache and environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+
+# Large binaries and archives
+*.zip
+*.tar.gz
+*.rar
+PCB-Photometric-AOI-Suite-v4.0-Complete.zip
+
+# Large presentation files outside static directory
+PCB_Photometric_AOI_Suite_v4_Presentation.pdf
+PCB_Photometric_AOI_Suite_v4_Presentation.pptx
+
+# Local environment and IDE settings
+.env
+.vscode/
+.idea/
+*.swp
+*~
